@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Daily Expense Monitor</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/ff/e5/c8/ffe5c8bfff56af5eb39a3f13dd4bde26.jpg">    
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet"
+          href="style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<div class="header-section">
+
+    <div class="container">
+
+        <div class="header-content">
+
+            <div>
+
+                <h2>
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                    Daily Expense Monitor
+                </h2>
+
+                <p>
+                    Record and monitor your daily expenses
+                </p>
+
+            </div>
+
+
+            <div class="date-display"
+                 id="currentDate">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<div class="container main-container">
+
+
+    <div class="expense-card">
+
+
+        <form id="expenseForm">
+
+
+            <div class="row g-3">
+
+
+                <!-- SERIAL -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Serial No.
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           id="serialNo"
+                           readonly>
+
+                </div>
+
+
+
+                <!-- CREATOR -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Creator
+                        <span class="required-star">*</span>
+
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           id="creator"
+                           placeholder="Enter creator name"
+                           required>
+
+                </div>
+
+
+
+                <!-- DATE -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Date
+                    </label>
+
+                    <input type="date"
+                           class="form-control"
+                           id="expenseDate">
+
+                </div>
+
+
+
+                <!-- TIME -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Time
+                    </label>
+
+                    <input type="time"
+                           class="form-control"
+                           id="expenseTime">
+
+                </div>
+
+
+
+                <!-- EXPENSE TYPE -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Expense Type
+                        <span class="required-star">*</span>
+
+                    </label>
+
+                    <select class="form-select"
+                            id="expenseType"
+                            required>
+
+                        <option value="">
+                            Select Type
+                        </option>
+
+                        <option value="AJM HOUSE">
+                            AJM HOUSE
+                        </option>
+
+                        <option value="Daily Expense">
+                            Daily Expense
+                        </option>
+
+                        <option value="Travel">
+                            Travel
+                        </option>
+
+                        <option value="Food">
+                            Food
+                        </option>
+
+                        <option value="Medical">
+                            Medical
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- CATEGORY -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Category
+                        <span class="required-star">*</span>
+
+                    </label>
+
+                    <select class="form-select"
+                            id="category"
+                            required>
+
+                        <option value="">
+                            Select Category
+                        </option>
+
+                        <option value="Electric Things">
+                            Electric Things
+                        </option>
+
+                        <option value="Plumbing Things">
+                            Plumbing Things
+                        </option>
+
+                        <option value="Mesthiry">
+                            Mesthiry
+                        </option>
+
+                        <option value="Breakfast">
+                            Breakfast
+                        </option>
+
+                        <option value="Lunch">
+                            Lunch
+                        </option>
+
+                        <option value="Dinner">
+                            Dinner
+                        </option>
+
+                        <option value="Transport">
+                            Transport
+                        </option>
+
+                        <option value="Accommodation">
+                            Accommodation
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="col-md-8">
+
+                    <label class="form-label">
+
+                        Description
+                        <span class="required-star">*</span>
+
+                    </label>
+
+                    <textarea class="form-control"
+                              id="comment"
+                              rows="3"
+                              placeholder="Enter expense details..."
+                              required></textarea>
+
+                </div>
+
+
+
+                <!-- AMOUNT -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Amount
+                        <span class="required-star">*</span>
+
+                    </label>
+
+                    <div class="amount-input">
+
+                        <span>₹</span>
+
+                        <input type="number"
+                               class="form-control"
+                               id="amount"
+                               placeholder="0.00"
+                               min="0.01"
+                               step="0.01"
+                               required>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- BUTTONS -->
+
+            <div class="button-area">
+
+
+                <button type="submit"
+                        class="btn btn-primary submit-btn">
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+
+                    Submit Expense
+
+                </button>
+
+
+                <button type="button"
+                        class="btn btn-success view-btn"
+                        onclick="goToExpenses()">
+
+                    <i class="fa-solid fa-table-list"></i>
+
+                    View Expenses
+
+                </button>
+
+
+                <button type="button"
+                        class="btn dashboard-btn"
+                        onclick="goToDashboard()">
+
+                    <i class="fa-solid fa-chart-column"></i>
+
+                    Dashboard
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- SUCCESS TOAST -->
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+
+    <div id="successToast"
+         class="toast"
+         role="alert">
+
+        <div class="toast-header">
+
+            <i class="fa-solid fa-circle-check text-success me-2"></i>
+
+            <strong class="me-auto">
+                Success
+            </strong>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast">
+            </button>
+
+        </div>
+
+        <div class="toast-body">
+
+            Expense saved successfully!
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

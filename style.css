@@ -1,0 +1,1069 @@
+/* =====================================================
+   GENERAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+
+    margin: 0;
+
+    background: #f4f7fb;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: #111827;
+
+}
+
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header-section {
+
+    background: #011c47;
+
+    padding: 24px 0;
+
+    border-bottom: 1px solid #000000;
+
+}
+
+
+.header-content {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+
+.header-content h2 {
+
+    margin: 0;
+
+    color: #feffff;
+
+    font-weight: 700;
+
+}
+
+
+.header-content h2 i {
+
+    margin-right: 8px;
+
+}
+
+
+.header-content p {
+
+    margin: 5px 0 0;
+
+    color: #dedfe1;
+
+    font-size: 16px;
+
+}
+
+
+.date-display {
+
+    color: #d0d0d0;
+
+    font-weight: 500;
+
+}
+
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main-container {
+
+    padding-top: 30px;
+
+    padding-bottom: 50px;
+
+}
+
+
+
+/* =====================================================
+   EXPENSE CARD
+===================================================== */
+
+.expense-card {
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    padding: 30px;
+
+    box-shadow:
+        0 8px 30px
+        rgba(15, 23, 42, 0.08);
+
+}
+
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.form-label {
+
+    font-weight: 600;
+
+    color: #374151;
+
+}
+
+
+.form-control,
+.form-select {
+
+    min-height: 48px;
+
+    border-radius: 10px;
+
+    border: 1px solid #d7dce5;
+
+}
+
+
+.form-control:focus,
+.form-select:focus {
+
+    border-color: #1267e8;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(18, 103, 232, 0.12);
+
+}
+
+
+textarea.form-control {
+
+    min-height: 100px;
+
+}
+
+
+.required-star {
+
+    color: #dc3545;
+
+    font-weight: 700;
+
+}
+
+
+
+/* =====================================================
+   AMOUNT
+===================================================== */
+
+.amount-input {
+
+    display: flex;
+
+    align-items: center;
+
+    border: 1px solid #d7dce5;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+}
+
+
+.amount-input span {
+
+    padding: 0 15px;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #1267e8;
+
+}
+
+
+.amount-input .form-control {
+
+    border: 0;
+
+    border-radius: 0;
+
+}
+
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.button-area {
+
+    margin-top: 30px;
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.submit-btn,
+.view-btn,
+.dashboard-btn {
+
+    min-height: 46px;
+
+    padding: 10px 20px;
+
+    border-radius: 9px;
+
+    font-weight: 600;
+
+}
+
+
+.submit-btn {
+
+    background: #1267e8;
+
+    border-color: #1267e8;
+
+}
+
+
+.view-btn {
+
+    background: #198754;
+
+}
+
+
+.dashboard-btn {
+
+    background: #6f42c1;
+
+    color: white;
+
+    border-color: #6f42c1;
+
+}
+
+
+.dashboard-btn:hover {
+
+    background: #5d36a5;
+
+    color: white;
+
+}
+
+
+
+/* =====================================================
+   SUMMARY CARDS
+===================================================== */
+
+.summary-card {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(15, 23, 42, 0.07);
+
+}
+
+
+.summary-icon {
+
+    width: 62px;
+
+    height: 62px;
+
+    border-radius: 13px;
+
+    background: #e8f1ff;
+
+    color: #1267e8;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 25px;
+
+}
+
+
+.summary-card small {
+
+    color: #64748b;
+
+    font-size: 15px;
+
+}
+
+
+.summary-card h3 {
+
+    margin: 4px 0 0;
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+}
+
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.table-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+
+.table-header h4 {
+
+    margin: 0;
+
+    color: #1267e8;
+
+    font-weight: 700;
+
+}
+
+
+.table-header p {
+
+    margin: 5px 0 0;
+
+    color: #64748b;
+
+}
+
+
+.header-buttons {
+
+    display: flex;
+
+    gap: 10px;
+
+}
+
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.expense-table {
+
+    margin-bottom: 0;
+
+}
+
+
+.expense-table thead th {
+
+    background: #1267e8;
+
+    color: white;
+
+    padding: 15px 12px;
+
+    white-space: nowrap;
+
+}
+
+
+.expense-table tbody td {
+
+    padding: 15px 12px;
+
+    vertical-align: middle;
+
+}
+
+
+.expense-table tfoot td {
+
+    background: #f8fafc;
+
+    padding: 18px;
+
+}
+
+
+.amount-cell {
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+
+.comment-cell {
+
+    min-width: 250px;
+
+}
+
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.action-buttons {
+
+    display: flex;
+
+    gap: 8px;
+
+}
+
+
+.edit-btn,
+.delete-btn {
+
+    border: none;
+
+    width: 44px;
+
+    height: 44px;
+
+    border-radius: 9px;
+
+    color: white;
+
+}
+
+
+.edit-btn {
+
+    background: #1267e8;
+
+}
+
+
+.delete-btn {
+
+    background: #dc3545;
+
+}
+
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty-message {
+
+    display: none;
+
+    text-align: center;
+
+    padding: 50px 20px;
+
+    color: #64748b;
+
+}
+
+
+.empty-message i {
+
+    font-size: 45px;
+
+    margin-bottom: 15px;
+
+    color: #94a3b8;
+
+}
+
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-top-buttons {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.dashboard-refresh {
+
+    background: #64748b;
+
+    color: white;
+
+    border-color: #64748b;
+
+}
+
+
+
+/* =====================================================
+   DASHBOARD CARDS
+===================================================== */
+
+.dashboard-card {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    min-height: 145px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(15, 23, 42, 0.07);
+
+}
+
+
+.dashboard-card-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    border-radius: 13px;
+
+    background: #e8f1ff;
+
+    color: #1267e8;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 23px;
+
+    flex-shrink: 0;
+
+}
+
+
+.dashboard-card span {
+
+    display: block;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+}
+
+
+.dashboard-card h3 {
+
+    margin: 5px 0;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-card h4 {
+
+    margin: 0;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+}
+
+
+
+/* =====================================================
+   DASHBOARD TITLE
+===================================================== */
+
+.dashboard-title h4 {
+
+    margin: 0;
+
+    color: #1267e8;
+
+    font-weight: 700;
+
+}
+
+
+.dashboard-title p {
+
+    margin: 5px 0 0;
+
+    color: #64748b;
+
+}
+
+
+.dashboard-subtitle {
+
+    color: #64748b;
+
+}
+
+
+
+/* =====================================================
+   MONTHLY BAR CHART
+===================================================== */
+
+.monthly-chart {
+
+    min-height: 350px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-around;
+
+    gap: 15px;
+
+    padding: 35px 10px 10px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+}
+
+
+.chart-column {
+
+    flex: 1;
+
+    max-width: 110px;
+
+    height: 290px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+}
+
+
+.chart-value {
+
+    font-weight: 700;
+
+    font-size: 13px;
+
+    margin-bottom: 8px;
+
+}
+
+
+.chart-bar-wrapper {
+
+    width: 60px;
+
+    height: 220px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+}
+
+
+.chart-bar {
+
+    width: 100%;
+
+    min-height: 3px;
+
+    background: #1267e8;
+
+    border-radius: 8px 8px 0 0;
+
+    transition: height 0.5s ease;
+
+}
+
+
+.chart-month {
+
+    margin-top: 10px;
+
+    font-weight: 600;
+
+    color: #475569;
+
+    font-size: 13px;
+
+}
+
+
+
+/* =====================================================
+   COMPARISON
+===================================================== */
+
+.comparison-card h4 {
+
+    color: #1267e8;
+
+    font-weight: 700;
+
+}
+
+
+.comparison-box {
+
+    margin-top: 25px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.comparison-box div {
+
+    flex: 1;
+
+    text-align: center;
+
+    background: #f8fafc;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+}
+
+
+.comparison-box span {
+
+    display: block;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+}
+
+
+.comparison-box strong {
+
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 22px;
+
+}
+
+
+.comparison-arrow {
+
+    flex: 0 0 auto !important;
+
+    background: transparent !important;
+
+    padding: 0 !important;
+
+    color: #1267e8;
+
+}
+
+
+.comparison-result {
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    background: #eef5ff;
+
+    color: #1267e8;
+
+    font-weight: 600;
+
+    text-align: center;
+
+}
+
+
+
+/* =====================================================
+   CATEGORY COMPARISON
+===================================================== */
+
+.category-row {
+
+    margin-bottom: 17px;
+
+}
+
+
+.category-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 6px;
+
+}
+
+
+.category-name {
+
+    font-weight: 600;
+
+}
+
+
+.category-amount {
+
+    font-weight: 700;
+
+}
+
+
+.category-progress {
+
+    height: 9px;
+
+    background: #e9eef5;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+}
+
+
+.category-progress-bar {
+
+    height: 100%;
+
+    background: #1267e8;
+
+    border-radius: 20px;
+
+}
+
+
+
+/* =====================================================
+   DASHBOARD TABLE
+===================================================== */
+
+.dashboard-table thead th {
+
+    background: #1267e8;
+
+    color: white;
+
+    padding: 15px;
+
+}
+
+
+.dashboard-table tbody td {
+
+    padding: 15px;
+
+    vertical-align: middle;
+
+}
+
+
+.increase {
+
+    color: #dc3545;
+
+    font-weight: 700;
+
+}
+
+
+.decrease {
+
+    color: #198754;
+
+    font-weight: 700;
+
+}
+
+
+.no-change {
+
+    color: #64748b;
+
+    font-weight: 700;
+
+}
+
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .header-content {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+    }
+
+
+    .table-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+
+    }
+
+
+    .header-buttons {
+
+        width: 100%;
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .dashboard-top-buttons {
+
+        justify-content: flex-start;
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .monthly-chart {
+
+        overflow-x: auto;
+
+        justify-content: flex-start;
+
+        min-width: 600px;
+
+    }
+
+
+    .comparison-box {
+
+        flex-direction: column;
+
+    }
+
+
+    .comparison-box div {
+
+        width: 100%;
+
+    }
+
+
+    .comparison-arrow {
+
+        transform: rotate(90deg);
+
+    }
+
+}

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Expense Dashboard</title>
+
+
+    <!-- Bootstrap -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+
+    <!-- Font Awesome -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- CSS -->
+
+    <link rel="stylesheet"
+          href="style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<div class="header-section">
+
+    <div class="container">
+
+        <div class="header-content">
+
+            <div>
+
+                <h2>
+
+                    <i class="fa-solid fa-chart-column"></i>
+
+                    Expense Dashboard
+
+                </h2>
+
+                <p>
+                    Month-on-Month Expense Comparison
+                </p>
+
+            </div>
+
+
+            <div class="date-display"
+                 id="currentDate">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     DASHBOARD
+====================================================== -->
+
+<div class="container main-container">
+
+
+    <!-- TOP BUTTONS -->
+
+    <div class="dashboard-top-buttons">
+
+        <button class="btn btn-primary"
+                onclick="goToExpenses()">
+
+            <i class="fa-solid fa-table-list"></i>
+
+            View Expenses
+
+        </button>
+
+
+        <button class="btn btn-secondary"
+                onclick="goBack()">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back
+
+        </button>
+
+
+        <button class="btn dashboard-refresh"
+                onclick="loadDashboard()">
+
+            <i class="fa-solid fa-rotate"></i>
+
+            Refresh
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =================================================
+         MONTH CARDS
+    ================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- CURRENT MONTH -->
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Current Month
+                    </span>
+
+                    <h3 id="currentMonthName">
+                        -
+                    </h3>
+
+                    <h4 id="currentMonthTotal">
+                        ₹0.00
+                    </h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PREVIOUS MONTH -->
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+
+                    <i class="fa-solid fa-calendar-minus"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Previous Month
+                    </span>
+
+                    <h3 id="previousMonthName">
+                        -
+                    </h3>
+
+                    <h4 id="previousMonthTotal">
+                        ₹0.00
+                    </h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- DIFFERENCE -->
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Difference
+                    </span>
+
+                    <h3 id="monthDifference">
+                        ₹0.00
+                    </h3>
+
+                    <small id="differencePercentage">
+                        0%
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- AVERAGE -->
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+
+                    <i class="fa-solid fa-chart-line"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Monthly Average
+                    </span>
+
+                    <h3 id="monthlyAverage">
+                        ₹0.00
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         MONTH COMPARISON
+    ================================================== -->
+
+    <div class="expense-card mb-4">
+
+
+        <div class="dashboard-title">
+
+            <div>
+
+                <h4>
+
+                    <i class="fa-solid fa-chart-column"></i>
+
+                    Month-on-Month Comparison
+
+                </h4>
+
+                <p>
+                    Compare your monthly expenses
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div id="monthlyChart"
+             class="monthly-chart">
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         CURRENT VS PREVIOUS
+    ================================================== -->
+
+    <div class="row g-4 mb-4">
+
+
+        <div class="col-lg-6">
+
+
+            <div class="expense-card comparison-card">
+
+
+                <h4>
+
+                    <i class="fa-solid fa-scale-balanced"></i>
+
+                    Current vs Previous Month
+
+                </h4>
+
+
+                <div class="comparison-box">
+
+
+                    <div>
+
+                        <span id="compareCurrentName">
+                            Current Month
+                        </span>
+
+                        <strong id="compareCurrentAmount">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="comparison-arrow">
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span id="comparePreviousName">
+                            Previous Month
+                        </span>
+
+                        <strong id="comparePreviousAmount">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="comparison-result"
+                     id="comparisonResult">
+
+                    No comparison available.
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CATEGORY -->
+
+        <div class="col-lg-6">
+
+
+            <div class="expense-card">
+
+
+                <h4>
+
+                    <i class="fa-solid fa-layer-group"></i>
+
+                    Category Comparison
+
+                </h4>
+
+
+                <p class="dashboard-subtitle">
+
+                    Current month category expenses
+
+                </p>
+
+
+                <div id="categoryComparison">
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         MONTHLY TABLE
+    ================================================== -->
+
+    <div class="expense-card">
+
+
+        <div class="dashboard-title">
+
+            <div>
+
+                <h4>
+
+                    <i class="fa-solid fa-table"></i>
+
+                    Monthly Summary
+
+                </h4>
+
+                <p>
+                    Detailed month-on-month totals
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+
+            <table class="table dashboard-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Month
+                        </th>
+
+                        <th>
+                            Total Entries
+                        </th>
+
+                        <th>
+                            Total Expense
+                        </th>
+
+                        <th>
+                            Difference
+                        </th>
+
+                        <th>
+                            Change
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="monthlyTableBody">
+
+                </tbody>
+
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
