@@ -5,10 +5,8 @@
 const SUPABASE_URL =
     "https://sdkhtfovazarqvzplagq.supabase.co";
 
-
 const SUPABASE_KEY =
     "sb_publishable_ve8mcuOtXSLpV_QS-YBqyg_JEguxAZ8";
-
 
 const supabaseClient =
     window.supabase.createClient(
@@ -17,15 +15,29 @@ const supabaseClient =
     );
 
 
-
 /* =====================================================
    GLOBAL VARIABLES
 ===================================================== */
 
 let deleteId = null;
-
 let editId = null;
 
+
+/* =====================================================
+   FILTER + PAGINATION VARIABLES
+===================================================== */
+
+let allExpenses = [];
+
+let filteredExpenses = [];
+
+let currentPage = 1;
+
+let rowsPerPage = 10;
+
+let selectedCreator = "ALL";
+
+let selectedExpenseType = "ALL";
 
 
 /* =====================================================
@@ -48,9 +60,12 @@ document.addEventListener(
 
         await loadDashboard();
 
+        initializeFilters();
+
+        initializePagination();
+
     }
 );
-
 
 
 /* =====================================================
@@ -64,13 +79,10 @@ function setCurrentDate() {
             "currentDate"
         );
 
-
     if (!element) return;
-
 
     const today =
         new Date();
-
 
     element.textContent =
         today.toLocaleDateString(
@@ -82,9 +94,7 @@ function setCurrentDate() {
                 day: "numeric"
             }
         );
-
 }
-
 
 
 /* =====================================================
@@ -98,13 +108,10 @@ function setCurrentTime() {
             "expenseTime"
         );
 
-
     if (!input) return;
-
 
     const now =
         new Date();
-
 
     const hours =
         String(
@@ -114,7 +121,6 @@ function setCurrentTime() {
             "0"
         );
 
-
     const minutes =
         String(
             now.getMinutes()
@@ -123,12 +129,9 @@ function setCurrentTime() {
             "0"
         );
 
-
     input.value =
         `${hours}:${minutes}`;
-
 }
-
 
 
 /* =====================================================
@@ -142,19 +145,15 @@ function setFormDate() {
             "expenseDate"
         );
 
-
     if (!input) return;
-
 
     input.value =
         getTodayDate();
-
 }
 
 
-
 /* =====================================================
-   TODAY
+   TODAY DATE
 ===================================================== */
 
 function getTodayDate() {
@@ -162,10 +161,8 @@ function getTodayDate() {
     const today =
         new Date();
 
-
     const year =
         today.getFullYear();
-
 
     const month =
         String(
@@ -175,7 +172,6 @@ function getTodayDate() {
             "0"
         );
 
-
     const day =
         String(
             today.getDate()
@@ -184,15 +180,12 @@ function getTodayDate() {
             "0"
         );
 
-
     return `${year}-${month}-${day}`;
-
 }
 
 
-
 /* =====================================================
-   GET ALL EXPENSES FROM SUPABASE
+   GET ALL EXPENSES
 ===================================================== */
 
 async function getExpenses() {
@@ -211,7 +204,6 @@ async function getExpenses() {
                 }
             );
 
-
     if (error) {
 
         console.error(
@@ -219,21 +211,16 @@ async function getExpenses() {
             error
         );
 
-
         alert(
-            "Unable to load expenses. Please check your Supabase connection."
+            "Unable to load expenses.\n\n" +
+            error.message
         );
 
-
         return [];
-
     }
 
-
     return data || [];
-
 }
-
 
 
 /* =====================================================
@@ -256,7 +243,6 @@ async function getNextSerialNumber() {
                 }
             );
 
-
     if (error) {
 
         console.error(
@@ -264,20 +250,15 @@ async function getNextSerialNumber() {
             error
         );
 
-
         return 1;
-
     }
 
-
     return (count || 0) + 1;
-
 }
 
 
-
 /* =====================================================
-   SET SERIAL NUMBER
+   SET NEXT SERIAL NUMBER
 ===================================================== */
 
 async function setNextSerialNumber() {
@@ -287,15 +268,11 @@ async function setNextSerialNumber() {
             "serialNo"
         );
 
-
     if (!input) return;
-
 
     input.value =
         await getNextSerialNumber();
-
 }
-
 
 
 /* =====================================================
@@ -307,7 +284,6 @@ const expenseForm =
         "expenseForm"
     );
 
-
 if (expenseForm) {
 
     expenseForm.addEventListener(
@@ -316,42 +292,35 @@ if (expenseForm) {
 
             event.preventDefault();
 
-
             const creator =
                 document.getElementById(
                     "creator"
                 ).value.trim();
-
 
             const date =
                 document.getElementById(
                     "expenseDate"
                 ).value;
 
-
             const time =
                 document.getElementById(
                     "expenseTime"
                 ).value;
-
 
             const expenseType =
                 document.getElementById(
                     "expenseType"
                 ).value;
 
-
             const category =
                 document.getElementById(
                     "category"
                 ).value;
 
-
             const comment =
                 document.getElementById(
                     "comment"
                 ).value.trim();
-
 
             const amount =
                 parseFloat(
@@ -359,7 +328,6 @@ if (expenseForm) {
                         "amount"
                     ).value
                 );
-
 
 
             /* =================================================
@@ -373,9 +341,7 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
-
 
             if (!date) {
 
@@ -384,9 +350,7 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
-
 
             if (!expenseType) {
 
@@ -395,9 +359,7 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
-
 
             if (!category) {
 
@@ -406,9 +368,7 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
-
 
             if (!comment) {
 
@@ -417,9 +377,7 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
-
 
             if (
                 isNaN(amount) ||
@@ -431,13 +389,11 @@ if (expenseForm) {
                 );
 
                 return;
-
             }
 
 
-
             /* =================================================
-               INSERT INTO SUPABASE
+               INSERT
             ================================================= */
 
             const {
@@ -448,28 +404,13 @@ if (expenseForm) {
                     .from("expenses")
                     .insert([
                         {
-
-                            creator:
-                                creator,
-
-                            expense_date:
-                                date,
-
-                            expense_time:
-                                time || null,
-
-                            expense_type:
-                                expenseType,
-
-                            category:
-                                category,
-
-                            comment:
-                                comment,
-
-                            amount:
-                                amount
-
+                            creator: creator,
+                            expense_date: date,
+                            expense_time: time || null,
+                            expense_type: expenseType,
+                            category: category,
+                            comment: comment,
+                            amount: amount
                         }
                     ])
                     .select();
@@ -482,17 +423,13 @@ if (expenseForm) {
                     error
                 );
 
-
                 alert(
                     "Expense could not be saved.\n\n" +
                     error.message
                 );
 
-
                 return;
-
             }
-
 
 
             /* =================================================
@@ -501,9 +438,7 @@ if (expenseForm) {
 
             showSuccessToast();
 
-
             expenseForm.reset();
-
 
             setFormDate();
 
@@ -511,6 +446,7 @@ if (expenseForm) {
 
             await setNextSerialNumber();
 
+            currentPage = 1;
 
             await loadExpenseTable();
 
@@ -518,9 +454,7 @@ if (expenseForm) {
 
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -534,20 +468,15 @@ function showSuccessToast() {
             "successToast"
         );
 
-
     if (!element) return;
-
 
     const toast =
         new bootstrap.Toast(
             element
         );
 
-
     toast.show();
-
 }
-
 
 
 /* =====================================================
@@ -558,7 +487,6 @@ function goToExpenses() {
 
     window.location.href =
         "expense.html";
-
 }
 
 
@@ -566,7 +494,6 @@ function goToDashboard() {
 
     window.location.href =
         "dashboard.html";
-
 }
 
 
@@ -574,9 +501,359 @@ function goBack() {
 
     window.location.href =
         "index.html";
-
 }
 
+
+/* =====================================================
+   INITIALIZE FILTERS
+===================================================== */
+
+function initializeFilters() {
+
+    const creatorFilter =
+        document.getElementById(
+            "creatorFilter"
+        );
+
+    const expenseTypeFilter =
+        document.getElementById(
+            "expenseTypeFilter"
+        );
+
+
+    /* =================================================
+       CREATOR FILTER
+    ================================================= */
+
+    if (creatorFilter) {
+
+        creatorFilter.addEventListener(
+            "change",
+            function () {
+
+                selectedCreator =
+                    this.value;
+
+                currentPage = 1;
+
+                applyFilters();
+
+            }
+        );
+    }
+
+
+    /* =================================================
+       EXPENSE TYPE FILTER
+    ================================================= */
+
+    if (expenseTypeFilter) {
+
+        expenseTypeFilter.addEventListener(
+            "change",
+            function () {
+
+                selectedExpenseType =
+                    this.value;
+
+                currentPage = 1;
+
+                applyFilters();
+
+            }
+        );
+    }
+
+
+    /* =================================================
+       CLEAR FILTER
+    ================================================= */
+
+    const clearFilterBtn =
+        document.getElementById(
+            "clearFilterBtn"
+        );
+
+    if (clearFilterBtn) {
+
+        clearFilterBtn.addEventListener(
+            "click",
+            function () {
+
+                selectedCreator =
+                    "ALL";
+
+                selectedExpenseType =
+                    "ALL";
+
+                currentPage = 1;
+
+                if (creatorFilter) {
+
+                    creatorFilter.value =
+                        "ALL";
+                }
+
+                if (expenseTypeFilter) {
+
+                    expenseTypeFilter.value =
+                        "ALL";
+                }
+
+                applyFilters();
+
+            }
+        );
+    }
+
+
+    populateCreatorFilter();
+
+    populateExpenseTypeFilter();
+}
+
+
+/* =====================================================
+   POPULATE CREATOR FILTER
+===================================================== */
+
+function populateCreatorFilter() {
+
+    const filter =
+        document.getElementById(
+            "creatorFilter"
+        );
+
+    if (!filter) return;
+
+
+    const currentValue =
+        filter.value || "ALL";
+
+
+    const creators =
+        [
+            ...new Set(
+                allExpenses
+                    .map(
+                        expense =>
+                            expense.creator
+                    )
+                    .filter(
+                        creator =>
+                            creator &&
+                            String(
+                                creator
+                            ).trim() !== ""
+                    )
+            )
+        ]
+        .sort(
+            (a, b) =>
+                String(a)
+                    .localeCompare(
+                        String(b)
+                    )
+        );
+
+
+    filter.innerHTML = `
+        <option value="ALL">
+            All Creators
+        </option>
+    `;
+
+
+    creators.forEach(
+        function (creator) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                creator;
+
+            option.textContent =
+                creator;
+
+            filter.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if (
+        creators.includes(
+            currentValue
+        )
+    ) {
+
+        filter.value =
+            currentValue;
+
+    }
+
+    else {
+
+        filter.value =
+            "ALL";
+
+    }
+}
+
+
+/* =====================================================
+   POPULATE EXPENSE TYPE FILTER
+===================================================== */
+
+function populateExpenseTypeFilter() {
+
+    const filter =
+        document.getElementById(
+            "expenseTypeFilter"
+        );
+
+    if (!filter) return;
+
+
+    const currentValue =
+        filter.value || "ALL";
+
+
+    const types =
+        [
+            ...new Set(
+                allExpenses
+                    .map(
+                        expense =>
+                            expense.expense_type
+                    )
+                    .filter(
+                        type =>
+                            type &&
+                            String(
+                                type
+                            ).trim() !== ""
+                    )
+            )
+        ]
+        .sort(
+            (a, b) =>
+                String(a)
+                    .localeCompare(
+                        String(b)
+                    )
+        );
+
+
+    filter.innerHTML = `
+        <option value="ALL">
+            All Expense Types
+        </option>
+    `;
+
+
+    types.forEach(
+        function (type) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                type;
+
+            option.textContent =
+                type;
+
+            filter.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if (
+        types.includes(
+            currentValue
+        )
+    ) {
+
+        filter.value =
+            currentValue;
+
+    }
+
+    else {
+
+        filter.value =
+            "ALL";
+
+    }
+}
+
+
+/* =====================================================
+   APPLY FILTERS
+===================================================== */
+
+function applyFilters() {
+
+    filteredExpenses =
+        allExpenses.filter(
+            function (expense) {
+
+                const creatorMatch =
+                    selectedCreator === "ALL" ||
+                    String(
+                        expense.creator || ""
+                    ).trim() ===
+                    String(
+                        selectedCreator
+                    ).trim();
+
+
+                const typeMatch =
+                    selectedExpenseType === "ALL" ||
+                    String(
+                        expense.expense_type || ""
+                    ).trim() ===
+                    String(
+                        selectedExpenseType
+                    ).trim();
+
+
+                return (
+                    creatorMatch &&
+                    typeMatch
+                );
+
+            }
+        );
+
+
+    /* =================================================
+       IMPORTANT:
+       GRAND TOTAL IS CALCULATED FROM
+       filteredExpenses, NOT CURRENT PAGE.
+    ================================================= */
+
+    updateSummary(
+        filteredExpenses
+    );
+
+
+    renderExpenseTable();
+
+    updatePagination();
+
+}
 
 
 /* =====================================================
@@ -590,7 +867,6 @@ async function loadExpenseTable() {
             "expenseTableBody"
         );
 
-
     if (!body) {
 
         console.log(
@@ -598,7 +874,6 @@ async function loadExpenseTable() {
         );
 
         return;
-
     }
 
 
@@ -607,65 +882,137 @@ async function loadExpenseTable() {
     );
 
 
-    const expenses =
+    allExpenses =
         await getExpenses();
 
 
     console.log(
         "Expenses:",
-        expenses
+        allExpenses
     );
+
+
+    populateCreatorFilter();
+
+    populateExpenseTypeFilter();
+
+
+    applyFilters();
+}
+
+
+/* =====================================================
+   RENDER EXPENSE TABLE
+===================================================== */
+
+function renderExpenseTable() {
+
+    const body =
+        document.getElementById(
+            "expenseTableBody"
+        );
+
+    if (!body) return;
 
 
     body.innerHTML = "";
 
 
+    /* =================================================
+       EMPTY DATA
+    ================================================= */
+
     if (
-        expenses.length === 0
+        filteredExpenses.length === 0
     ) {
 
         showEmptyMessage();
 
         updateSummary([]);
 
-        return;
+        updatePagination();
 
+        return;
     }
 
 
     hideEmptyMessage();
 
 
-
-    /*
-       NEWEST RECORD FIRST
-
-       Database ID:
-       1
-       2
-       3
-       4
-
-       Display:
-       newest first
-
-       Serial:
-       1
-       2
-       3
-       4
-    */
+    /* =================================================
+       NEWEST FIRST
+    ================================================= */
 
     const sorted =
-        [...expenses].reverse();
+        [...filteredExpenses].reverse();
 
 
-    sorted.forEach(
+    /* =================================================
+       PAGINATION CALCULATION
+    ================================================= */
+
+    const totalEntries =
+        sorted.length;
+
+
+    const totalPages =
+        Math.ceil(
+            totalEntries /
+            rowsPerPage
+        );
+
+
+    if (
+        currentPage >
+        totalPages
+    ) {
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    if (
+        currentPage < 1
+    ) {
+
+        currentPage = 1;
+
+    }
+
+
+    const startIndex =
+        (
+            currentPage - 1
+        ) *
+        rowsPerPage;
+
+
+    const endIndex =
+        Math.min(
+            startIndex +
+            rowsPerPage,
+            totalEntries
+        );
+
+
+    const pageExpenses =
+        sorted.slice(
+            startIndex,
+            endIndex
+        );
+
+
+    /* =================================================
+       CREATE ROWS
+    ================================================= */
+
+    pageExpenses.forEach(
         function (
             expense,
             index
         ) {
-
 
             const row =
                 document.createElement(
@@ -673,30 +1020,27 @@ async function loadExpenseTable() {
                 );
 
 
+            const displaySerial =
+                startIndex +
+                index +
+                1;
+
+
             row.innerHTML = `
 
                 <td>
-
                     <strong>
-
-                        ${index + 1}
-
+                        ${displaySerial}
                     </strong>
-
                 </td>
 
-
                 <td>
-
                     ${escapeHTML(
                         expense.creator
                     )}
-
                 </td>
 
-
                 <td>
-
                     ${
                         expense.expense_date
                         ? formatDate(
@@ -704,12 +1048,9 @@ async function loadExpenseTable() {
                         )
                         : "-"
                     }
-
                 </td>
 
-
                 <td>
-
                     ${
                         expense.expense_time
                         ? escapeHTML(
@@ -722,9 +1063,7 @@ async function loadExpenseTable() {
                         )
                         : "-"
                     }
-
                 </td>
-
 
                 <td>
 
@@ -738,29 +1077,22 @@ async function loadExpenseTable() {
 
                 </td>
 
-
                 <td>
-
                     ${escapeHTML(
                         expense.category
                     )}
-
                 </td>
 
-
                 <td class="comment-cell">
-
                     ${escapeHTML(
                         expense.comment
                     )}
-
                 </td>
-
 
                 <td class="amount-cell">
 
                     ₹${Number(
-                        expense.amount
+                        expense.amount || 0
                     ).toLocaleString(
                         "en-IN",
                         {
@@ -771,11 +1103,9 @@ async function loadExpenseTable() {
 
                 </td>
 
-
                 <td>
 
                     <div class="action-buttons">
-
 
                         <button
                             type="button"
@@ -796,7 +1126,6 @@ async function loadExpenseTable() {
 
                         </button>
 
-
                     </div>
 
                 </td>
@@ -812,12 +1141,791 @@ async function loadExpenseTable() {
     );
 
 
-    updateSummary(
-        expenses
-    );
+    /* =================================================
+       UPDATE PAGINATION
+    ================================================= */
 
+    updatePagination();
+
+
+    /* =================================================
+       IMPORTANT:
+       TOTAL IS FOR ALL FILTERED RECORDS,
+       NOT ONLY CURRENT PAGE.
+    ================================================= */
+
+    updateSummary(
+        filteredExpenses
+    );
 }
 
+
+/* =====================================================
+   INITIALIZE PAGINATION
+===================================================== */
+
+function initializePagination() {
+
+    const expenseCard =
+        document.querySelector(
+            ".expense-card"
+        );
+
+    if (!expenseCard) return;
+
+
+    let paginationContainer =
+        document.getElementById(
+            "expensePaginationContainer"
+        );
+
+
+    /* =================================================
+       IF HTML DOES NOT HAVE PAGINATION,
+       CREATE IT AUTOMATICALLY.
+    ================================================= */
+
+    if (!paginationContainer) {
+
+        paginationContainer =
+            document.createElement(
+                "div"
+            );
+
+        paginationContainer.id =
+            "expensePaginationContainer";
+
+        paginationContainer.className =
+            "expense-pagination-container";
+
+
+        paginationContainer.innerHTML = `
+
+            <div class="pagination-left">
+
+                <div class="showing-text"
+                     id="showingEntries">
+
+                    Showing 0 - 0 of 0 entries
+
+                </div>
+
+            </div>
+
+
+            <div class="pagination-right">
+
+                <div class="rows-control">
+
+                  
+                </div>
+
+
+                <div
+                    id="paginationButtons"
+                    class="pagination-buttons">
+                </div>
+
+            </div>
+
+        `;
+
+
+        expenseCard.appendChild(
+            paginationContainer
+        );
+
+
+        /* =================================================
+           ROWS PER PAGE
+        ================================================= */
+
+        const rowsSelect =
+            document.getElementById(
+                "rowsPerPage"
+            );
+
+
+        if (rowsSelect) {
+
+            rowsSelect.value =
+                String(
+                    rowsPerPage
+                );
+
+
+            rowsSelect.addEventListener(
+                "change",
+                function () {
+
+                    rowsPerPage =
+                        parseInt(
+                            this.value,
+                            10
+                        );
+
+
+                    currentPage =
+                        1;
+
+
+                    renderExpenseTable();
+
+                }
+            );
+
+        }
+
+    }
+
+
+    addPaginationStyles();
+
+    updatePagination();
+}
+
+
+/* =====================================================
+   UPDATE PAGINATION
+===================================================== */
+
+function updatePagination() {
+
+    const showingEntries =
+        document.getElementById(
+            "showingEntries"
+        );
+
+
+    const paginationButtons =
+        document.getElementById(
+            "paginationButtons"
+        );
+
+
+    if (
+        !showingEntries &&
+        !paginationButtons
+    ) {
+
+        initializePagination();
+
+        return;
+    }
+
+
+    const total =
+        filteredExpenses.length;
+
+
+    /* =================================================
+       EMPTY
+    ================================================= */
+
+    if (total === 0) {
+
+        if (showingEntries) {
+
+            showingEntries.textContent =
+                "Showing 0 - 0 of 0 entries";
+
+        }
+
+
+        if (paginationButtons) {
+
+            paginationButtons.innerHTML =
+                "";
+
+        }
+
+        return;
+    }
+
+
+    const totalPages =
+        Math.ceil(
+            total /
+            rowsPerPage
+        );
+
+
+    if (
+        currentPage >
+        totalPages
+    ) {
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    const start =
+        (
+            currentPage -
+            1
+        ) *
+        rowsPerPage +
+        1;
+
+
+    const end =
+        Math.min(
+            currentPage *
+            rowsPerPage,
+            total
+        );
+
+
+    /* =================================================
+       SHOWING TEXT
+    ================================================= */
+
+    if (showingEntries) {
+
+        showingEntries.textContent =
+            `Showing ${start} - ${end} of ${total} entries`;
+
+    }
+
+
+    /* =================================================
+       PAGINATION BUTTONS
+    ================================================= */
+
+    if (!paginationButtons) return;
+
+
+    paginationButtons.innerHTML =
+        "";
+
+
+    /* =================================================
+       PREVIOUS
+    ================================================= */
+
+    const previousButton =
+        document.createElement(
+            "button"
+        );
+
+    previousButton.type =
+        "button";
+
+    previousButton.className =
+        "page-btn";
+
+    previousButton.innerHTML =
+        `<i class="fa-solid fa-chevron-left"></i>`;
+
+
+    if (
+        currentPage === 1
+    ) {
+
+        previousButton.disabled =
+            true;
+
+    }
+
+
+    previousButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                currentPage > 1
+            ) {
+
+                currentPage--;
+
+                renderExpenseTable();
+
+                scrollToExpenseTable();
+
+            }
+
+        }
+    );
+
+
+    paginationButtons.appendChild(
+        previousButton
+    );
+
+
+    /* =================================================
+       PAGE NUMBERS
+    ================================================= */
+
+    const pageNumbers =
+        getPageNumbers(
+            currentPage,
+            totalPages
+        );
+
+
+    pageNumbers.forEach(
+        function (page) {
+
+            if (page === "...") {
+
+                const dots =
+                    document.createElement(
+                        "span"
+                    );
+
+                dots.className =
+                    "page-dots";
+
+                dots.textContent =
+                    "...";
+
+                paginationButtons.appendChild(
+                    dots
+                );
+
+                return;
+            }
+
+
+            const pageButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            pageButton.type =
+                "button";
+
+
+            pageButton.className =
+                "page-btn";
+
+
+            if (
+                page === currentPage
+            ) {
+
+                pageButton.classList.add(
+                    "active"
+                );
+
+            }
+
+
+            pageButton.textContent =
+                page;
+
+
+            pageButton.addEventListener(
+                "click",
+                function () {
+
+                    currentPage =
+                        page;
+
+                    renderExpenseTable();
+
+                    scrollToExpenseTable();
+
+                }
+            );
+
+
+            paginationButtons.appendChild(
+                pageButton
+            );
+
+        }
+    );
+
+
+    /* =================================================
+       NEXT
+    ================================================= */
+
+    const nextButton =
+        document.createElement(
+            "button"
+        );
+
+
+    nextButton.type =
+        "button";
+
+
+    nextButton.className =
+        "page-btn";
+
+
+    nextButton.innerHTML =
+        `<i class="fa-solid fa-chevron-right"></i>`;
+
+
+    if (
+        currentPage ===
+        totalPages
+    ) {
+
+        nextButton.disabled =
+            true;
+
+    }
+
+
+    nextButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                currentPage <
+                totalPages
+            ) {
+
+                currentPage++;
+
+                renderExpenseTable();
+
+                scrollToExpenseTable();
+
+            }
+
+        }
+    );
+
+
+    paginationButtons.appendChild(
+        nextButton
+    );
+}
+
+
+/* =====================================================
+   PAGE NUMBER GENERATOR
+===================================================== */
+
+function getPageNumbers(
+    current,
+    total
+) {
+
+    const pages = [];
+
+
+    if (
+        total <= 7
+    ) {
+
+        for (
+            let i = 1;
+            i <= total;
+            i++
+        ) {
+
+            pages.push(i);
+
+        }
+
+        return pages;
+    }
+
+
+    pages.push(1);
+
+
+    if (
+        current > 4
+    ) {
+
+        pages.push("...");
+
+    }
+
+
+    const start =
+        Math.max(
+            2,
+            current - 1
+        );
+
+
+    const end =
+        Math.min(
+            total - 1,
+            current + 1
+        );
+
+
+    for (
+        let i = start;
+        i <= end;
+        i++
+    ) {
+
+        pages.push(i);
+
+    }
+
+
+    if (
+        current <
+        total - 3
+    ) {
+
+        pages.push("...");
+
+    }
+
+
+    pages.push(
+        total
+    );
+
+
+    return pages;
+}
+
+
+/* =====================================================
+   SCROLL TO TABLE
+===================================================== */
+
+function scrollToExpenseTable() {
+
+    const table =
+        document.querySelector(
+            ".expense-card"
+        );
+
+    if (!table) return;
+
+
+    table.scrollIntoView(
+        {
+            behavior: "smooth",
+            block: "start"
+        }
+    );
+}
+
+
+/* =====================================================
+   PAGINATION CSS
+===================================================== */
+
+function addPaginationStyles() {
+
+    if (
+        document.getElementById(
+            "expensePaginationStyles"
+        )
+    ) {
+
+        return;
+    }
+
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "expensePaginationStyles";
+
+
+    style.textContent = `
+
+        .expense-pagination-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            padding: 25px 0 5px 0;
+
+            border-top: 1px solid #dee2e6;
+
+            margin-top: 10px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .pagination-left {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+        .showing-text {
+
+            color: #52677d;
+
+            font-size: 16px;
+
+        }
+
+
+        .pagination-right {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 20px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .rows-control {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #52677d;
+
+            font-size: 15px;
+
+        }
+
+
+        .rows-control select {
+
+            width: 70px;
+
+            border: 1px solid #0d6efd;
+
+            color: #0d6efd;
+
+        }
+
+
+        .pagination-buttons {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+
+        .page-btn {
+
+            min-width: 34px;
+
+            height: 38px;
+
+            padding: 5px 10px;
+
+            border: 1px solid #0d6efd;
+
+            background: white;
+
+            color: #0d6efd;
+
+            border-radius: 6px;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+        }
+
+
+        .page-btn:hover:not(:disabled) {
+
+            background: #0d6efd;
+
+            color: white;
+
+        }
+
+
+        .page-btn.active {
+
+            background: #0d6efd;
+
+            color: white;
+
+        }
+
+
+        .page-btn:disabled {
+
+            opacity: 0.45;
+
+            cursor: not-allowed;
+
+        }
+
+
+        .page-dots {
+
+            min-width: 25px;
+
+            text-align: center;
+
+            color: #52677d;
+
+        }
+
+
+        @media (max-width: 768px) {
+
+            .expense-pagination-container {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+
+            .pagination-right {
+
+                width: 100%;
+
+                justify-content: space-between;
+
+            }
+
+
+            .showing-text {
+
+                font-size: 14px;
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+}
 
 
 /* =====================================================
@@ -847,9 +1955,7 @@ function formatDate(
 
 
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
-
 }
-
 
 
 /* =====================================================
@@ -884,9 +1990,6 @@ function updateSummary(
         );
 
 
-    if (!totalEntries) return;
-
-
     const today =
         getTodayDate();
 
@@ -894,7 +1997,8 @@ function updateSummary(
     const todayCount =
         expenses.filter(
             expense =>
-                expense.expense_date === today
+                expense.expense_date ===
+                today
         ).length;
 
 
@@ -917,8 +2021,12 @@ function updateSummary(
         );
 
 
-    totalEntries.textContent =
-        expenses.length;
+    if (totalEntries) {
+
+        totalEntries.textContent =
+            expenses.length;
+
+    }
 
 
     if (todayEntries) {
@@ -932,7 +2040,9 @@ function updateSummary(
     if (totalAmount) {
 
         totalAmount.textContent =
-            formatCurrency(total);
+            formatCurrency(
+                total
+            );
 
     }
 
@@ -940,19 +2050,21 @@ function updateSummary(
     if (grandTotal) {
 
         grandTotal.textContent =
-            formatCurrency(total);
+            formatCurrency(
+                total
+            );
 
     }
-
 }
-
 
 
 /* =====================================================
    EDIT EXPENSE
 ===================================================== */
 
-async function editExpense(id) {
+async function editExpense(
+    id
+) {
 
     const {
         data: expense,
@@ -968,20 +2080,20 @@ async function editExpense(id) {
             .single();
 
 
-    if (error || !expense) {
+    if (
+        error ||
+        !expense
+    ) {
 
         console.error(
             error
         );
 
-
         alert(
             "Expense not found."
         );
 
-
         return;
-
     }
 
 
@@ -1048,7 +2160,7 @@ async function editExpense(id) {
     if (creator) {
 
         creator.value =
-            expense.creator;
+            expense.creator || "";
 
     }
 
@@ -1065,13 +2177,13 @@ async function editExpense(id) {
 
         time.value =
             expense.expense_time
-            ? String(
-                expense.expense_time
-            ).substring(
-                0,
-                5
-            )
-            : "";
+                ? String(
+                    expense.expense_time
+                ).substring(
+                    0,
+                    5
+                )
+                : "";
 
     }
 
@@ -1079,7 +2191,7 @@ async function editExpense(id) {
     if (type) {
 
         type.value =
-            expense.expense_type;
+            expense.expense_type || "";
 
     }
 
@@ -1087,7 +2199,7 @@ async function editExpense(id) {
     if (category) {
 
         category.value =
-            expense.category;
+            expense.category || "";
 
     }
 
@@ -1095,7 +2207,7 @@ async function editExpense(id) {
     if (comment) {
 
         comment.value =
-            expense.comment;
+            expense.comment || "";
 
     }
 
@@ -1103,7 +2215,7 @@ async function editExpense(id) {
     if (amount) {
 
         amount.value =
-            expense.amount;
+            expense.amount || "";
 
     }
 
@@ -1124,9 +2236,7 @@ async function editExpense(id) {
 
 
     modal.show();
-
 }
-
 
 
 /* =====================================================
@@ -1140,7 +2250,6 @@ async function updateExpense() {
     ) {
 
         return;
-
     }
 
 
@@ -1188,11 +2297,6 @@ async function updateExpense() {
         );
 
 
-
-    /* =================================================
-       VALIDATION
-    ================================================= */
-
     if (!creator) {
 
         alert(
@@ -1200,7 +2304,6 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
 
@@ -1211,7 +2314,6 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
 
@@ -1222,7 +2324,6 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
 
@@ -1233,7 +2334,6 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
 
@@ -1244,7 +2344,6 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
 
@@ -1258,44 +2357,38 @@ async function updateExpense() {
         );
 
         return;
-
     }
 
-
-
-    /* =================================================
-       UPDATE SUPABASE
-    ================================================= */
 
     const {
         error
     } =
         await supabaseClient
             .from("expenses")
-            .update({
+            .update(
+                {
+                    creator:
+                        creator,
 
-                creator:
-                    creator,
+                    expense_date:
+                        date,
 
-                expense_date:
-                    date,
+                    expense_time:
+                        time || null,
 
-                expense_time:
-                    time || null,
+                    expense_type:
+                        expenseType,
 
-                expense_type:
-                    expenseType,
+                    category:
+                        category,
 
-                category:
-                    category,
+                    comment:
+                        comment,
 
-                comment:
-                    comment,
-
-                amount:
-                    amount
-
-            })
+                    amount:
+                        amount
+                }
+            )
             .eq(
                 "id",
                 editId
@@ -1309,15 +2402,12 @@ async function updateExpense() {
             error
         );
 
-
         alert(
             "Expense could not be updated.\n\n" +
             error.message
         );
 
-
         return;
-
     }
 
 
@@ -1356,9 +2446,7 @@ async function updateExpense() {
     alert(
         "Expense updated successfully!"
     );
-
 }
-
 
 
 /* =====================================================
@@ -1379,11 +2467,7 @@ function deleteExpense(
         );
 
 
-    if (!modalElement) {
-
-        return;
-
-    }
+    if (!modalElement) return;
 
 
     const modal =
@@ -1393,9 +2477,7 @@ function deleteExpense(
 
 
     modal.show();
-
 }
-
 
 
 /* =====================================================
@@ -1413,7 +2495,6 @@ if (confirmDelete) {
     confirmDelete.addEventListener(
         "click",
         async function () {
-
 
             if (
                 deleteId === null
@@ -1443,15 +2524,12 @@ if (confirmDelete) {
                     error
                 );
 
-
                 alert(
                     "Expense could not be deleted.\n\n" +
                     error.message
                 );
 
-
                 return;
-
             }
 
 
@@ -1482,6 +2560,10 @@ if (confirmDelete) {
             }
 
 
+            currentPage =
+                1;
+
+
             await loadExpenseTable();
 
             await loadDashboard();
@@ -1490,9 +2572,7 @@ if (confirmDelete) {
 
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -1513,7 +2593,6 @@ function showEmptyMessage() {
             "block";
 
     }
-
 }
 
 
@@ -1531,9 +2610,7 @@ function hideEmptyMessage() {
             "none";
 
     }
-
 }
-
 
 
 /* =====================================================
@@ -1557,9 +2634,7 @@ function getMonthKey(
         0,
         7
     );
-
 }
-
 
 
 function getCurrentMonthKey() {
@@ -1578,9 +2653,7 @@ function getCurrentMonthKey() {
             "0"
         )
     );
-
 }
-
 
 
 function getPreviousMonthKey() {
@@ -1604,9 +2677,7 @@ function getPreviousMonthKey() {
             "0"
         )
     );
-
 }
-
 
 
 function getMonthName(
@@ -1639,9 +2710,7 @@ function getMonthName(
             year: "numeric"
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -1654,14 +2723,12 @@ function getMonthTotal(
 ) {
 
     return expenses
-
         .filter(
             expense =>
                 getMonthKey(
                     expense.expense_date
                 ) === monthKey
         )
-
         .reduce(
             (
                 sum,
@@ -1669,13 +2736,11 @@ function getMonthTotal(
             ) =>
                 sum +
                 Number(
-                    expense.amount
+                    expense.amount || 0
                 ),
             0
         );
-
 }
-
 
 
 /* =====================================================
@@ -1693,9 +2758,7 @@ function getMonthEntries(
                 expense.expense_date
             ) === monthKey
     );
-
 }
-
 
 
 /* =====================================================
@@ -1743,9 +2806,7 @@ function getLastSixMonths() {
 
 
     return months;
-
 }
-
 
 
 /* =====================================================
@@ -1798,7 +2859,8 @@ async function loadDashboard() {
         previousTotal;
 
 
-    let percentage = 0;
+    let percentage =
+        0;
 
 
     if (
@@ -1814,11 +2876,6 @@ async function loadDashboard() {
 
     }
 
-
-
-    /* =================================================
-       CARDS
-    ================================================= */
 
     setText(
         "currentMonthName",
@@ -1922,7 +2979,6 @@ async function loadDashboard() {
     }
 
 
-
     /* =================================================
        SIX MONTH AVERAGE
     ================================================= */
@@ -1961,21 +3017,11 @@ async function loadDashboard() {
     );
 
 
-
-    /* =================================================
-       CHART
-    ================================================= */
-
     createMonthlyChart(
         expenses,
         sixMonths
     );
 
-
-
-    /* =================================================
-       COMPARISON
-    ================================================= */
 
     createComparison(
         currentMonth,
@@ -1987,33 +3033,21 @@ async function loadDashboard() {
     );
 
 
-
-    /* =================================================
-       CATEGORY
-    ================================================= */
-
     createCategoryComparison(
         expenses,
         currentMonth
     );
 
 
-
-    /* =================================================
-       MONTHLY TABLE
-    ================================================= */
-
     createMonthlyTable(
         expenses,
         sixMonths
     );
-
 }
 
 
-
 /* =====================================================
-   SET TEXT HELPER
+   SET TEXT
 ===================================================== */
 
 function setText(
@@ -2033,9 +3067,7 @@ function setText(
             value;
 
     }
-
 }
-
 
 
 /* =====================================================
@@ -2049,7 +3081,7 @@ function formatCurrency(
     return (
         "₹" +
         Number(
-            amount
+            amount || 0
         ).toLocaleString(
             "en-IN",
             {
@@ -2058,9 +3090,7 @@ function formatCurrency(
             }
         )
     );
-
 }
-
 
 
 /* =====================================================
@@ -2081,7 +3111,8 @@ function createMonthlyChart(
     if (!chart) return;
 
 
-    chart.innerHTML = "";
+    chart.innerHTML =
+        "";
 
 
     const totals =
@@ -2113,11 +3144,11 @@ function createMonthlyChart(
 
             const height =
                 total === 0
-                ? 3
-                : (
-                    total /
-                    maximum
-                ) * 210;
+                    ? 3
+                    : (
+                        total /
+                        maximum
+                    ) * 210;
 
 
             const column =
@@ -2134,7 +3165,9 @@ function createMonthlyChart(
 
                 <div class="chart-value">
 
-                    ${formatCurrency(total)}
+                    ${formatCurrency(
+                        total
+                    )}
 
                 </div>
 
@@ -2166,9 +3199,7 @@ function createMonthlyChart(
 
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -2197,9 +3228,7 @@ function getShortMonthName(
             month: "short"
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -2264,9 +3293,7 @@ function createComparison(
         result.textContent =
             "No expenses available for comparison.";
 
-
         return;
-
     }
 
 
@@ -2318,9 +3345,7 @@ function createComparison(
             "Expense is the same as the previous month.";
 
     }
-
 }
-
 
 
 /* =====================================================
@@ -2341,7 +3366,8 @@ function createCategoryComparison(
     if (!container) return;
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     const currentExpenses =
@@ -2365,9 +3391,7 @@ function createCategoryComparison(
 
         `;
 
-
         return;
-
     }
 
 
@@ -2394,7 +3418,7 @@ function createCategoryComparison(
 
             categories[category] +=
                 Number(
-                    expense.amount
+                    expense.amount || 0
                 );
 
         }
@@ -2409,14 +3433,15 @@ function createCategoryComparison(
                 a,
                 b
             ) =>
-                b[1] - a[1]
+                b[1] -
+                a[1]
         );
 
 
     const maximum =
         sorted.length > 0
-        ? sorted[0][1]
-        : 1;
+            ? sorted[0][1]
+            : 1;
 
 
     sorted.forEach(
@@ -2491,9 +3516,7 @@ function createCategoryComparison(
 
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -2514,7 +3537,8 @@ function createMonthlyTable(
     if (!body) return;
 
 
-    body.innerHTML = "";
+    body.innerHTML =
+        "";
 
 
     const reversed =
@@ -2559,11 +3583,11 @@ function createMonthlyTable(
 
             const previousTotal =
                 previousMonth
-                ? getMonthTotal(
-                    expenses,
-                    previousMonth
-                )
-                : 0;
+                    ? getMonthTotal(
+                        expenses,
+                        previousMonth
+                    )
+                    : 0;
 
 
             const difference =
@@ -2703,12 +3727,12 @@ function createMonthlyTable(
 
                     ${
                         previousMonth
-                        ? formatCurrency(
-                            Math.abs(
-                                difference
+                            ? formatCurrency(
+                                Math.abs(
+                                    difference
+                                )
                             )
-                        )
-                        : "-"
+                            : "-"
                     }
 
                 </td>
@@ -2729,9 +3753,7 @@ function createMonthlyTable(
 
         }
     );
-
 }
-
 
 
 /* =====================================================
@@ -2748,35 +3770,28 @@ function escapeHTML(
     ) {
 
         return "";
-
     }
 
 
     return String(value)
-
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
         );
-
 }
