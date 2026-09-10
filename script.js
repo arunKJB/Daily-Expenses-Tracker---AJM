@@ -1,47 +1,11 @@
-/* ============================================================
-   DAILY EXPENSE TRACKER
-   COMPLETE JAVASCRIPT
-
-   FEATURES:
-   - Supabase connection
-   - Add expense
-   - Add expense type
-   - Expense type loading
-   - Expense listing
-   - Filtering
-   - Pagination
-   - Page total
-   - Grand total
-   - Edit
-   - Delete
-   - Dashboard
-   - PDF generation
-   - Responsive navigation
-============================================================ */
-
-
-/* ============================================================
-   SUPABASE CONFIGURATION
-============================================================ */
-
 const SUPABASE_URL =
     "https://sdkhtfovazarqvzplagq.supabase.co";
-
-
-/*
-   IMPORTANT:
-
-   Replace this with your existing Supabase ANON PUBLIC KEY.
-
-   Do NOT use the service_role key in frontend JavaScript.
-*/
 
 const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNka2h0Zm92YXphcnF2enBsYWdxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODQzMDA1OCwiZXhwIjoyMTA0MDA2MDU4fQ.Rf9sKrsoua5Am_4AwHX2Qdib4NmOzOzBaRfyJndLt9M";
 
 
 let supabaseClient = null;
-
 
 /* ============================================================
    GLOBAL VARIABLES
@@ -4975,4 +4939,18 @@ function showError(
         );
 
     }
+}
+
+function goToSharedExpenses() {
+
+    window.location.href =
+        "shared-expenses.html";
+
+}
+
+function goToSharedExpenses() {
+
+    window.location.href =
+        "shared-expenses.html";
+
 }
