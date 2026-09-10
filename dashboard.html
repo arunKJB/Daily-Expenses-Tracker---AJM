@@ -6,24 +6,35 @@
     <meta charset="UTF-8">
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta name="theme-color" content="#0d6efd">
+
+    <meta name="description"
+          content="Daily Expense Dashboard">
 
     <title>Expense Dashboard</title>
 
 
-    <!-- Bootstrap -->
+    <!-- =====================================================
+         BOOTSTRAP
+    ====================================================== -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
 
-    <!-- Font Awesome -->
+    <!-- =====================================================
+         FONT AWESOME
+    ====================================================== -->
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 
-    <!-- CSS -->
+    <!-- =====================================================
+         CUSTOM CSS
+    ====================================================== -->
 
     <link rel="stylesheet"
           href="style.css">
@@ -34,17 +45,17 @@
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================================
      HEADER
-====================================================== -->
+========================================================== -->
 
-<div class="header-section">
+<header class="header-section">
 
     <div class="container">
 
         <div class="header-content">
 
-            <div>
+            <div class="header-title-area">
 
                 <h2>
 
@@ -63,24 +74,27 @@
 
             <div class="date-display"
                  id="currentDate">
+
             </div>
 
         </div>
 
     </div>
 
-</div>
+</header>
 
 
 
-<!-- =====================================================
+<!-- =========================================================
      DASHBOARD
-====================================================== -->
+========================================================== -->
 
-<div class="container main-container">
+<main class="container main-container">
 
 
-    <!-- TOP BUTTONS -->
+    <!-- =====================================================
+         TOP BUTTONS
+    ====================================================== -->
 
     <div class="dashboard-top-buttons">
 
@@ -117,16 +131,14 @@
 
 
 
-    <!-- =================================================
+    <!-- =====================================================
          MONTH CARDS
-    ================================================== -->
+    ====================================================== -->
 
     <div class="row g-3 mb-4">
 
 
-        <!-- CURRENT MONTH -->
-
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-lg-3">
 
             <div class="dashboard-card">
 
@@ -159,9 +171,7 @@
 
 
 
-        <!-- PREVIOUS MONTH -->
-
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-lg-3">
 
             <div class="dashboard-card">
 
@@ -194,9 +204,7 @@
 
 
 
-        <!-- DIFFERENCE -->
-
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-lg-3">
 
             <div class="dashboard-card">
 
@@ -229,9 +237,7 @@
 
 
 
-        <!-- AVERAGE -->
-
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-lg-3">
 
             <div class="dashboard-card">
 
@@ -263,9 +269,9 @@
 
 
 
-    <!-- =================================================
+    <!-- =====================================================
          MONTH COMPARISON
-    ================================================== -->
+    ====================================================== -->
 
     <div class="expense-card mb-4">
 
@@ -291,7 +297,6 @@
         </div>
 
 
-
         <div id="monthlyChart"
              class="monthly-chart">
 
@@ -302,14 +307,14 @@
 
 
 
-    <!-- =================================================
+    <!-- =====================================================
          CURRENT VS PREVIOUS
-    ================================================== -->
+    ====================================================== -->
 
     <div class="row g-4 mb-4">
 
 
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
 
 
             <div class="expense-card comparison-card">
@@ -379,7 +384,7 @@
 
         <!-- CATEGORY -->
 
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
 
 
             <div class="expense-card">
@@ -415,9 +420,9 @@
 
 
 
-    <!-- =================================================
+    <!-- =====================================================
          MONTHLY TABLE
-    ================================================== -->
+    ====================================================== -->
 
     <div class="expense-card">
 
@@ -491,13 +496,30 @@
     </div>
 
 
-</div>
+</main>
+
+
+
+<!-- =========================================================
+     SUPABASE
+========================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
+<!-- =========================================================
+     BOOTSTRAP
+========================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+
+<!-- =========================================================
+     MAIN JAVASCRIPT
+========================================================== -->
+
 <script src="script.js"></script>
+
 
 </body>
 
