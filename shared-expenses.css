@@ -1,0 +1,2057 @@
+/* ============================================================
+   SHARED EXPENSE / MONEY TO RECEIVE PAGE
+   COMPLETE PAGE-SPECIFIC CSS
+   RESPONSIVE FOR MOBILE / TABLET / DESKTOP
+   ============================================================ */
+
+
+/* ============================================================
+   1. PAGE BASE
+   ============================================================ */
+
+.shared-expense-page {
+    min-height: 100vh;
+
+    background: linear-gradient(
+        135deg,
+        #f5f7fb 0%,
+        #eef2f7 100%
+    );
+
+    padding-bottom: 40px;
+}
+
+
+.shared-expense-container {
+    width: 100%;
+    max-width: 1500px;
+
+    margin: 0 auto;
+
+    padding: 20px;
+}
+
+
+/* ============================================================
+   2. PAGE TITLE / HEADER
+   ============================================================ */
+
+.shared-page-title,
+.shared-expense-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    padding: 22px 25px;
+
+    margin-bottom: 22px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+
+.shared-expense-header-content {
+    min-width: 0;
+}
+
+
+.shared-page-title h3,
+.shared-expense-title {
+    margin: 0 0 5px;
+
+    color: #212529;
+
+    font-size: clamp(
+        1.35rem,
+        2.5vw,
+        2rem
+    );
+
+    font-weight: 700;
+
+    line-height: 1.2;
+}
+
+
+.shared-expense-title i {
+    margin-right: 8px;
+}
+
+
+.shared-page-title p,
+.shared-expense-subtitle {
+    margin: 0;
+
+    color: #6c757d;
+
+    font-size: 0.95rem;
+}
+
+
+.shared-expense-header-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+
+/* ============================================================
+   3. NAVIGATION BUTTONS
+   ============================================================ */
+
+.shared-nav-btn {
+    min-height: 42px;
+
+    padding: 8px 14px !important;
+
+    border-radius: 10px !important;
+
+    font-size: 0.9rem !important;
+
+    font-weight: 600 !important;
+
+    white-space: nowrap;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.shared-nav-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ============================================================
+   4. SUMMARY CARDS
+   ============================================================ */
+
+.shared-summary-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+
+.shared-summary-card {
+    position: relative;
+
+    background: #ffffff;
+
+    border-radius: 17px;
+
+    padding: 20px;
+
+    min-height: 125px;
+
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 7px 22px rgba(0, 0, 0, 0.06);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.shared-summary-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.10);
+}
+
+
+.shared-summary-icon {
+    width: 55px;
+
+    height: 55px;
+
+    min-width: 55px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #eef4ff;
+
+    color: #0d6efd;
+
+    font-size: 1.35rem;
+
+    flex-shrink: 0;
+}
+
+
+.shared-summary-content {
+    min-width: 0;
+}
+
+
+.shared-summary-card span,
+.shared-summary-label {
+    display: block;
+
+    margin: 0 0 5px;
+
+    color: #6c757d;
+
+    font-size: 0.82rem;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.3px;
+}
+
+
+.shared-summary-card h3,
+.shared-summary-value {
+    margin: 3px 0 0;
+
+    color: #212529;
+
+    font-size: clamp(
+        1.15rem,
+        2vw,
+        1.55rem
+    );
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    word-break: break-word;
+}
+
+
+/* ============================================================
+   5. SUMMARY CARD VARIATIONS
+   ============================================================ */
+
+.shared-summary-card.receivable-card
+.shared-summary-icon {
+    background: #e8fff1;
+    color: #198754;
+}
+
+
+.shared-summary-card.pending-card
+.shared-summary-icon {
+    background: #fff3cd;
+    color: #856404;
+}
+
+
+.shared-summary-card.paid-card
+.shared-summary-icon {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+
+.shared-summary-card.overdue-card
+.shared-summary-icon {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+
+/* ============================================================
+   6. FORM CARD
+   ============================================================ */
+
+.shared-form-card,
+.shared-expense-form-card {
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    margin-bottom: 22px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+
+.shared-form-card h4 {
+    margin: 0 0 5px;
+
+    color: #212529;
+
+    font-size: 1.2rem;
+
+    font-weight: 700;
+}
+
+
+.shared-section-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 22px;
+
+    padding-bottom: 14px;
+
+    border-bottom: 1px solid #e9ecef;
+}
+
+
+.shared-section-title {
+    margin: 0;
+
+    color: #212529;
+
+    font-size: 1.2rem;
+
+    font-weight: 700;
+}
+
+
+.shared-section-title i {
+    margin-right: 7px;
+}
+
+
+.shared-form-subtitle {
+    margin-bottom: 22px;
+
+    color: #6c757d;
+}
+
+
+/* ============================================================
+   7. FORM LABELS
+   ============================================================ */
+
+.shared-form-card .form-label,
+.shared-expense-form-card .form-label {
+    margin-bottom: 7px;
+
+    color: #343a40;
+
+    font-size: 0.88rem;
+
+    font-weight: 600;
+}
+
+
+.required-star {
+    color: #dc3545;
+}
+
+
+.shared-form-card .required,
+.shared-expense-form-card .required {
+    color: #dc3545;
+}
+
+
+/* ============================================================
+   8. FORM INPUTS
+   ============================================================ */
+
+.shared-form-card .form-control,
+.shared-form-card .form-select,
+.shared-expense-form-card .form-control,
+.shared-expense-form-card .form-select {
+    width: 100%;
+
+    min-height: 44px;
+
+    padding: 9px 12px;
+
+    border: 1px solid #ced4da;
+
+    border-radius: 10px;
+
+    background-color: #ffffff;
+
+    color: #212529;
+
+    font-size: 0.93rem;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.shared-form-card .form-control:focus,
+.shared-form-card .form-select:focus,
+.shared-expense-form-card .form-control:focus,
+.shared-expense-form-card .form-select:focus {
+    border-color: #86b7fe;
+
+    box-shadow:
+        0 0 0 0.2rem
+        rgba(13, 110, 253, 0.12);
+}
+
+
+.shared-form-card textarea.form-control,
+.shared-expense-form-card textarea.form-control {
+    min-height: 95px;
+
+    resize: vertical;
+}
+
+
+/* ============================================================
+   9. CALCULATED AMOUNT FIELD
+   ============================================================ */
+
+.shared-calculated-field {
+    background: #f8f9fa !important;
+
+    color: #198754 !important;
+
+    font-weight: 700;
+
+    cursor: default;
+}
+
+
+.shared-calculated-field:focus {
+    background: #f8f9fa !important;
+}
+
+
+/* ============================================================
+   10. AMOUNT PREVIEW
+   ============================================================ */
+
+.amount-preview {
+    background: #f8f9fa;
+
+    border: 1px solid #dee2e6;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    margin-top: 10px;
+}
+
+
+.amount-preview-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 8px;
+}
+
+
+.amount-preview-row:last-child {
+    margin-bottom: 0;
+}
+
+
+.amount-preview strong {
+    font-size: 18px;
+}
+
+
+/* ============================================================
+   11. AMOUNT TO RECEIVE HIGHLIGHT
+   ============================================================ */
+
+.receive-highlight {
+    background: #e8fff1;
+
+    border: 1px solid #b7ebc6;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    margin-top: 12px;
+
+    color: #146c43;
+}
+
+
+.receive-highlight strong {
+    font-size: 22px;
+}
+
+
+/* ============================================================
+   12. SPLIT BUTTON
+   ============================================================ */
+
+.shared-split-btn {
+    min-height: 42px;
+
+    padding: 8px 14px !important;
+
+    border-radius: 9px !important;
+
+    font-size: 0.85rem !important;
+
+    font-weight: 600 !important;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   13. ADD EXPENSE TYPE BUTTON
+   ============================================================ */
+
+.shared-add-type-btn {
+    min-height: 42px;
+
+    padding: 8px 14px !important;
+
+    border-radius: 9px !important;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    font-size: 0.85rem !important;
+
+    font-weight: 600 !important;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   14. FORM ACTIONS
+   ============================================================ */
+
+.shared-form-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 10px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #e9ecef;
+}
+
+
+.shared-form-actions .btn {
+    min-height: 44px;
+
+    padding: 9px 18px;
+
+    border-radius: 10px;
+
+    font-size: 0.9rem;
+
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   15. FILTER CARD
+   ============================================================ */
+
+.shared-filter-card,
+.shared-filter-section {
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    margin-bottom: 22px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 7px 22px rgba(0, 0, 0, 0.06);
+}
+
+
+.shared-filter-section {
+    background: #f8f9fa;
+
+    padding: 15px;
+
+    margin-bottom: 18px;
+
+    border: 1px solid #e9ecef;
+
+    box-shadow: none;
+}
+
+
+.shared-filter-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 12px;
+
+    align-items: end;
+}
+
+
+.shared-filter-item {
+    min-width: 0;
+}
+
+
+.shared-filter-item label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #495057;
+
+    font-size: 0.8rem;
+
+    font-weight: 600;
+}
+
+
+.shared-filter-item .form-control,
+.shared-filter-item .form-select {
+    width: 100%;
+
+    min-height: 42px;
+
+    border-radius: 9px;
+
+    font-size: 0.88rem;
+}
+
+
+.shared-clear-filter {
+    width: 100%;
+
+    min-height: 42px;
+
+    border-radius: 9px !important;
+
+    font-size: 0.86rem !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* ============================================================
+   16. TABLE CARD
+   ============================================================ */
+
+.shared-table-card,
+.shared-expense-list-card {
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+
+.shared-table-card .table {
+    margin-bottom: 0;
+}
+
+
+/* ============================================================
+   17. TABLE WRAPPER
+   ============================================================ */
+
+.shared-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    border: 1px solid #dee2e6;
+
+    border-radius: 13px;
+}
+
+
+/* ============================================================
+   18. TABLE
+   ============================================================ */
+
+.shared-expense-table {
+    width: 100%;
+
+    min-width: 1250px;
+
+    margin: 0;
+
+    vertical-align: middle;
+}
+
+
+.shared-table-card th,
+.shared-expense-table thead th {
+    background: #f1f3f5;
+
+    color: #343a40;
+
+    font-size: 0.78rem;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    padding: 13px 11px;
+
+    border-bottom: 2px solid #dee2e6;
+
+    vertical-align: middle;
+}
+
+
+.shared-table-card td,
+.shared-expense-table tbody td {
+    padding: 12px 11px;
+
+    color: #343a40;
+
+    font-size: 0.84rem;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+}
+
+
+.shared-expense-table tbody tr {
+    transition:
+        background-color 0.15s ease;
+}
+
+
+.shared-expense-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+
+/* ============================================================
+   19. PERSON NAME
+   ============================================================ */
+
+.person-name,
+.shared-person-name {
+    color: #212529;
+
+    font-weight: 700;
+}
+
+
+.shared-person-contact {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #6c757d;
+
+    font-size: 0.73rem;
+}
+
+
+/* ============================================================
+   20. DESCRIPTION
+   ============================================================ */
+
+.description-cell,
+.shared-description-cell {
+    min-width: 180px;
+
+    max-width: 280px;
+
+    white-space: normal !important;
+
+    word-break: break-word;
+
+    line-height: 1.4;
+}
+
+
+.shared-description-cell {
+    max-width: 220px;
+}
+
+
+/* ============================================================
+   21. AMOUNT CELLS
+   ============================================================ */
+
+.amount-cell,
+.shared-money {
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.shared-total-money {
+    color: #212529;
+}
+
+
+.shared-my-share {
+    color: #6c757d;
+}
+
+
+.shared-receivable-money {
+    color: #198754;
+
+    font-weight: 700;
+}
+
+
+.shared-paid-money,
+.paid-amount {
+    color: #198754;
+
+    font-weight: 700;
+}
+
+
+.shared-balance-money,
+.pending-amount {
+    color: #dc3545;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   22. STATUS BADGES
+   ============================================================ */
+
+.status-badge,
+.shared-status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 90px;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 0.72rem;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.status-pending,
+.shared-status-pending {
+    background: #fff3cd;
+
+    color: #856404;
+}
+
+
+.status-partial,
+.shared-status-partial {
+    background: #cff4fc;
+
+    color: #055160;
+}
+
+
+.status-paid,
+.shared-status-paid {
+    background: #d1e7dd;
+
+    color: #0f5132;
+}
+
+
+.status-cancelled,
+.shared-status-cancelled {
+    background: #f8d7da;
+
+    color: #842029;
+}
+
+
+/* ============================================================
+   23. OVERDUE BADGE
+   ============================================================ */
+
+.shared-overdue-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    margin-top: 4px;
+
+    padding: 4px 7px;
+
+    border-radius: 6px;
+
+    background: #f8d7da;
+
+    color: #842029;
+
+    font-size: 0.68rem;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   24. ACTION BUTTONS
+   ============================================================ */
+
+.action-buttons,
+.shared-action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: nowrap;
+
+    gap: 5px;
+}
+
+
+.shared-action-btn {
+    width: 34px;
+
+    height: 34px;
+
+    padding: 0 !important;
+
+    border-radius: 8px !important;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 0.8rem !important;
+}
+
+
+.shared-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.shared-follow-up-btn {
+    min-width: 34px;
+
+    height: 34px;
+
+    padding: 0 8px !important;
+
+    border-radius: 8px !important;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 0.78rem !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* ============================================================
+   25. TABLE TOTAL
+   ============================================================ */
+
+.shared-table-total {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 16px;
+
+    padding: 15px 17px;
+
+    background: #f8f9fa;
+
+    border: 1px solid #e9ecef;
+
+    border-radius: 12px;
+}
+
+
+.shared-table-total-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #495057;
+
+    font-size: 0.88rem;
+}
+
+
+.shared-table-total-label {
+    font-weight: 600;
+}
+
+
+.shared-table-total-value {
+    font-size: 1rem;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   26. PAGINATION
+   ============================================================ */
+
+.shared-pagination-wrapper {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 18px;
+}
+
+
+.shared-pagination-info {
+    color: #6c757d;
+
+    font-size: 0.82rem;
+}
+
+
+.shared-pagination {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+}
+
+
+.shared-pagination .page-link {
+    min-width: 36px;
+
+    height: 36px;
+
+    padding: 5px 10px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px !important;
+
+    font-size: 0.8rem;
+
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   27. EMPTY STATE
+   ============================================================ */
+
+.shared-empty,
+.shared-empty-state {
+    padding: 50px 20px;
+
+    text-align: center;
+
+    color: #6c757d;
+}
+
+
+.shared-empty i,
+.shared-empty-state i {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 45px;
+
+    opacity: 0.5;
+}
+
+
+.shared-empty-state h5 {
+    margin-bottom: 6px;
+
+    color: #495057;
+
+    font-size: 1rem;
+
+    font-weight: 700;
+}
+
+
+.shared-empty-state p {
+    margin: 0;
+
+    font-size: 0.85rem;
+}
+
+
+/* ============================================================
+   28. FOLLOW-UP CARD
+   ============================================================ */
+
+.followup-card {
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    margin-bottom: 12px;
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+.followup-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+
+.followup-person {
+    color: #212529;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+
+.followup-amount {
+    color: #dc3545;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.followup-meta {
+    margin-top: 5px;
+
+    color: #6c757d;
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   29. LOADING
+   ============================================================ */
+
+.shared-loading {
+    min-height: 150px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    color: #6c757d;
+
+    font-size: 0.9rem;
+}
+
+
+/* ============================================================
+   30. MODAL
+   ============================================================ */
+
+.shared-expense-modal .modal-content {
+    border: 0;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+
+.shared-expense-modal .modal-header {
+    padding: 17px 20px;
+
+    border-bottom: 1px solid #e9ecef;
+}
+
+
+.shared-expense-modal .modal-title {
+    font-size: 1.05rem;
+
+    font-weight: 700;
+}
+
+
+.shared-expense-modal .modal-body {
+    padding: 20px;
+}
+
+
+.shared-expense-modal .modal-footer {
+    padding: 14px 20px;
+
+    border-top: 1px solid #e9ecef;
+}
+
+
+.shared-type-input {
+    min-height: 45px;
+
+    border-radius: 10px !important;
+}
+
+
+/* ============================================================
+   31. TOAST
+   ============================================================ */
+
+.shared-toast-container {
+    position: fixed;
+
+    right: 20px;
+
+    bottom: 20px;
+
+    z-index: 9999;
+
+    width: min(
+        380px,
+        calc(100vw - 40px)
+    );
+}
+
+
+.shared-toast {
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* ============================================================
+   32. LARGE TABLET / SMALL DESKTOP
+   ============================================================ */
+
+@media (max-width: 1199.98px) {
+
+    .shared-summary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .shared-filter-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .shared-expense-container {
+        padding: 18px;
+    }
+
+}
+
+
+/* ============================================================
+   33. TABLET
+   ============================================================ */
+
+@media (max-width: 991.98px) {
+
+    .shared-page-title,
+    .shared-expense-header {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        padding: 20px;
+    }
+
+
+    .shared-expense-header-actions {
+        justify-content: flex-start;
+    }
+
+
+    .shared-form-card,
+    .shared-expense-form-card,
+    .shared-filter-card,
+    .shared-table-card,
+    .shared-expense-list-card {
+        padding: 20px;
+    }
+
+
+    .shared-section-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+}
+
+
+/* ============================================================
+   34. MOBILE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+
+    .shared-expense-page {
+        padding-bottom: 25px;
+    }
+
+
+    .shared-expense-container {
+        padding: 12px;
+    }
+
+
+    .shared-page-title,
+    .shared-expense-header {
+        padding: 17px;
+
+        margin-bottom: 15px;
+
+        border-radius: 14px;
+    }
+
+
+    .shared-page-title h3,
+    .shared-expense-title {
+        font-size: 1.35rem;
+    }
+
+
+    .shared-page-title p,
+    .shared-expense-subtitle {
+        font-size: 0.82rem;
+    }
+
+
+    /* HEADER BUTTONS */
+
+    .shared-expense-header-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        width: 100%;
+    }
+
+
+    .shared-nav-btn {
+        width: 100%;
+
+        min-height: 42px;
+    }
+
+
+    /* SUMMARY */
+
+    .shared-summary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 10px;
+
+        margin-bottom: 15px;
+    }
+
+
+    .shared-summary-card {
+        min-height: 105px;
+
+        padding: 14px;
+
+        gap: 10px;
+
+        border-radius: 13px;
+    }
+
+
+    .shared-summary-icon {
+        width: 42px;
+
+        height: 42px;
+
+        min-width: 42px;
+
+        border-radius: 11px;
+
+        font-size: 1rem;
+    }
+
+
+    .shared-summary-card span,
+    .shared-summary-label {
+        font-size: 0.67rem;
+    }
+
+
+    .shared-summary-card h3,
+    .shared-summary-value {
+        font-size: 1rem;
+    }
+
+
+    /* CARDS */
+
+    .shared-form-card,
+    .shared-expense-form-card,
+    .shared-filter-card,
+    .shared-table-card,
+    .shared-expense-list-card {
+        padding: 15px;
+
+        margin-bottom: 15px;
+
+        border-radius: 14px;
+    }
+
+
+    .shared-section-title {
+        font-size: 1rem;
+    }
+
+
+    /* FILTER */
+
+    .shared-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .shared-filter-section {
+        padding: 12px;
+    }
+
+
+    /* AMOUNT */
+
+    .amount-preview-row {
+        font-size: 14px;
+    }
+
+
+    /* FORM BUTTONS */
+
+    .shared-form-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+    }
+
+
+    .shared-form-actions .btn {
+        width: 100%;
+
+        padding-left: 10px;
+
+        padding-right: 10px;
+    }
+
+
+    /* TOTAL */
+
+    .shared-table-total {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 8px;
+    }
+
+
+    .shared-table-total-item {
+        justify-content: space-between;
+    }
+
+
+    /* PAGINATION */
+
+    .shared-pagination-wrapper {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .shared-pagination {
+        justify-content: center;
+    }
+
+}
+
+
+/* ============================================================
+   35. SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 576px) {
+
+    .shared-page-title {
+        align-items: flex-start;
+    }
+
+
+    .shared-page-title .btn {
+        width: 100%;
+    }
+
+
+    .shared-page-title h3,
+    .shared-expense-title {
+        font-size: 1.2rem;
+    }
+
+
+    .shared-summary-card h3,
+    .shared-summary-value {
+        font-size: 0.95rem;
+    }
+
+}
+
+
+/* ============================================================
+   36. VERY SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 479.98px) {
+
+    .shared-expense-container {
+        padding: 8px;
+    }
+
+
+    .shared-page-title,
+    .shared-expense-header {
+        padding: 14px;
+
+        border-radius: 12px;
+    }
+
+
+    .shared-page-title h3,
+    .shared-expense-title {
+        font-size: 1.15rem;
+    }
+
+
+    .shared-page-title p,
+    .shared-expense-subtitle {
+        font-size: 0.76rem;
+    }
+
+
+    /* HEADER */
+
+    .shared-expense-header-actions {
+        grid-template-columns: 1fr;
+    }
+
+
+    .shared-nav-btn {
+        font-size: 0.78rem !important;
+    }
+
+
+    /* SUMMARY */
+
+    .shared-summary-grid {
+        gap: 8px;
+    }
+
+
+    .shared-summary-card {
+        min-height: 94px;
+
+        padding: 11px;
+
+        gap: 8px;
+    }
+
+
+    .shared-summary-icon {
+        width: 36px;
+
+        height: 36px;
+
+        min-width: 36px;
+
+        border-radius: 9px;
+
+        font-size: 0.85rem;
+    }
+
+
+    .shared-summary-card span,
+    .shared-summary-label {
+        font-size: 0.6rem;
+
+        letter-spacing: 0;
+    }
+
+
+    .shared-summary-card h3,
+    .shared-summary-value {
+        font-size: 0.88rem;
+    }
+
+
+    /* CARDS */
+
+    .shared-form-card,
+    .shared-expense-form-card,
+    .shared-filter-card,
+    .shared-table-card,
+    .shared-expense-list-card {
+        padding: 12px;
+    }
+
+
+    /* FORM BUTTONS */
+
+    .shared-form-actions {
+        grid-template-columns: 1fr;
+    }
+
+
+    .shared-section-header {
+        margin-bottom: 16px;
+    }
+
+
+    /* TABLE */
+
+    .shared-table-wrapper {
+        border-radius: 9px;
+    }
+
+
+    .shared-expense-table {
+        min-width: 1150px;
+    }
+
+
+    .shared-expense-table thead th {
+        padding: 10px 8px;
+
+        font-size: 0.72rem;
+    }
+
+
+    .shared-expense-table tbody td {
+        padding: 9px 8px;
+
+        font-size: 0.76rem;
+    }
+
+
+    /* FOLLOW-UP */
+
+    .followup-card {
+        padding: 15px;
+    }
+
+
+    .followup-person {
+        font-size: 15px;
+    }
+
+
+    .followup-amount {
+        font-size: 16px;
+    }
+
+}
+
+
+/* ============================================================
+   37. EXTREMELY SMALL DEVICES
+   ============================================================ */
+
+@media (max-width: 359.98px) {
+
+    .shared-expense-container {
+        padding: 6px;
+    }
+
+
+    .shared-summary-card {
+        min-height: 88px;
+
+        padding: 9px;
+    }
+
+
+    .shared-summary-icon {
+        width: 32px;
+
+        height: 32px;
+
+        min-width: 32px;
+    }
+
+
+    .shared-summary-card h3,
+    .shared-summary-value {
+        font-size: 0.78rem;
+    }
+
+}
+
+
+/* ============================================================
+   38. MOBILE LANDSCAPE
+   ============================================================ */
+
+@media (max-height: 500px)
+and (orientation: landscape) {
+
+    .shared-page-title,
+    .shared-expense-header {
+        padding: 13px 16px;
+    }
+
+
+    .shared-summary-card {
+        min-height: 90px;
+    }
+
+
+    .shared-form-card,
+    .shared-expense-form-card,
+    .shared-filter-card,
+    .shared-table-card,
+    .shared-expense-list-card {
+        padding: 15px;
+    }
+
+}
+
+
+/* ============================================================
+   39. TOUCH SCREEN DEVICES
+   ============================================================ */
+
+@media (hover: none)
+and (pointer: coarse) {
+
+    .shared-nav-btn:hover,
+    .shared-summary-card:hover,
+    .shared-action-btn:hover {
+        transform: none;
+
+        box-shadow: none;
+    }
+
+
+    .shared-action-btn,
+    .shared-follow-up-btn {
+        min-width: 38px;
+
+        min-height: 38px;
+    }
+
+}
+
+
+/* ============================================================
+   40. ACCESSIBILITY
+   ============================================================ */
+
+.shared-expense-page button:focus-visible,
+.shared-expense-page a:focus-visible,
+.shared-expense-page input:focus-visible,
+.shared-expense-page select:focus-visible,
+.shared-expense-page textarea:focus-visible {
+
+    outline:
+        3px solid
+        rgba(13, 110, 253, 0.25);
+
+    outline-offset: 2px;
+}
+
+
+/* ============================================================
+   41. REDUCE MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .shared-expense-page *,
+    .shared-expense-page *::before,
+    .shared-expense-page *::after {
+
+        scroll-behavior: auto !important;
+
+        transition: none !important;
+
+        animation: none !important;
+    }
+
+}
+
+
+/* ============================================================
+   42. PRINT / PDF
+   ============================================================ */
+
+.shared-print-header {
+    display: none;
+}
+
+
+@media print {
+
+    @page {
+        size: landscape;
+
+        margin: 10mm;
+    }
+
+
+    body {
+        background: #ffffff !important;
+    }
+
+
+    .header-section,
+    .no-print,
+    .shared-form-card,
+    .shared-expense-form-card,
+    .shared-filter-card,
+    .shared-filter-section,
+    .action-column,
+    .action-cell,
+    .shared-expense-header-actions,
+    .shared-form-actions,
+    .shared-pagination-wrapper,
+    .followup-card {
+        display: none !important;
+    }
+
+
+    .main-container,
+    .shared-expense-container {
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        padding: 0 !important;
+
+        margin: 0 !important;
+    }
+
+
+    .shared-print-header {
+        display: block !important;
+
+        text-align: center;
+
+        margin-bottom: 15px;
+    }
+
+
+    .shared-print-header h1 {
+        margin-bottom: 5px;
+
+        font-size: 22px;
+    }
+
+
+    .shared-print-header p {
+        margin: 2px;
+
+        font-size: 12px;
+    }
+
+
+    .shared-table-card,
+    .shared-expense-list-card {
+        padding: 0 !important;
+
+        border: none !important;
+
+        box-shadow: none !important;
+    }
+
+
+    .shared-table-wrapper {
+        overflow: visible !important;
+
+        border: none !important;
+    }
+
+
+    .shared-table-card .table,
+    .shared-expense-table {
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        font-size: 9px !important;
+    }
+
+
+    .shared-table-card th,
+    .shared-table-card td,
+    .shared-expense-table th,
+    .shared-expense-table td {
+        padding: 5px !important;
+
+        border: 1px solid #333 !important;
+    }
+
+}
