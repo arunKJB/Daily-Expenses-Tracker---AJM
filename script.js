@@ -1456,7 +1456,7 @@ function initializeFilters() {
 
     const printButton =
         document.getElementById(
-            "printExpensesBtn"
+            "printBtn"
         );
 
 
