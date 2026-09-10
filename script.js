@@ -2698,69 +2698,172 @@ async function confirmDeleteExpense() {
    PRINT EXPENSES
 ============================================================ */
 
+/* ============================================================
+   DAILY EXPENSE TRACKER
+   MOBILE + DESKTOP PRINT FUNCTION
+============================================================ */
+
 function printExpenses() {
 
-    if (
-        !filteredExpenses ||
-        filteredExpenses.length === 0
-    ) {
+    console.log("Print button clicked");
 
-        showError(
-            "There are no expenses to print."
+    /*
+       ---------------------------------------------------------
+       1. CHECK FOR ANDROID WEBVIEW BRIDGE
+       ---------------------------------------------------------
+
+       If your mobile-app builder provides a JavaScript bridge
+       called AndroidPrint, the native Android application can
+       handle printing.
+
+       Example native method:
+
+       AndroidPrint.printPage()
+
+       If your app builder uses a different bridge name,
+       that name must be used here.
+    */
+
+    try {
+
+        if (
+            typeof AndroidPrint !== "undefined" &&
+            typeof AndroidPrint.printPage === "function"
+        ) {
+
+            console.log("Android native print bridge detected.");
+
+            AndroidPrint.printPage();
+
+            return;
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Android print bridge unavailable:",
+            error
         );
-
-        return;
 
     }
 
 
-    /* --------------------------------------------------------
-       UPDATE PRINT DATE
-    -------------------------------------------------------- */
+    /*
+       ---------------------------------------------------------
+       2. CHECK FOR GENERIC WEBVIEW BRIDGE
+       ---------------------------------------------------------
+    */
 
-    const printDate =
-        document.getElementById(
-            "printGeneratedDate"
+    try {
+
+        if (
+            typeof Android !== "undefined" &&
+            typeof Android.printPage === "function"
+        ) {
+
+            console.log("Generic Android print bridge detected.");
+
+            Android.printPage();
+
+            return;
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Generic Android bridge unavailable:",
+            error
         );
-
-
-    if (printDate) {
-
-        const now =
-            new Date();
-
-
-        printDate.textContent =
-            now.toLocaleString(
-                "en-IN",
-                {
-                    dateStyle: "medium",
-                    timeStyle: "short"
-                }
-            );
 
     }
 
 
-    /* --------------------------------------------------------
-       IMPORTANT:
-       Browser print prints the complete filtered table,
-       not only the current pagination page.
-    -------------------------------------------------------- */
+    /*
+       ---------------------------------------------------------
+       3. NORMAL BROWSER
+       ---------------------------------------------------------
 
-    prepareFullPrintTable();
+       Chrome / Edge / Firefox / desktop browser etc.
+    */
 
+    try {
 
-    setTimeout(
-        function () {
+        if (typeof window.print === "function") {
+
+            console.log("Opening browser print dialog...");
 
             window.print();
 
-        },
-        200
+            return;
+        }
+
+    } catch (error) {
+
+        console.log(
+            "window.print() failed:",
+            error
+        );
+
+    }
+
+
+    /*
+       ---------------------------------------------------------
+       4. FINAL FALLBACK
+       ---------------------------------------------------------
+    */
+
+    showPrintInstructions();
+
+}
+
+
+/* ============================================================
+   PRINT INSTRUCTIONS
+============================================================ */
+
+function showPrintInstructions() {
+
+    alert(
+        "Printing is not supported directly by this mobile app.\n\n" +
+        "Please open the Expense Tracker website in Chrome " +
+        "and use the Print option there."
     );
 
 }
+
+
+/* ============================================================
+   OPTIONAL PRINT BUTTON INITIALIZATION
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const printBtn =
+            document.getElementById("printBtn");
+
+        if (!printBtn) {
+
+            return;
+
+        }
+
+        printBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                printExpenses();
+
+            }
+        );
+
+    }
+);
+
 
 
 /* ============================================================
@@ -3180,3 +3283,5 @@ async function loadDashboard() {
     }
 
 }
+
+
