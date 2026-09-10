@@ -1067,3 +1067,618 @@ textarea.form-control {
     }
 
 }
+
+
+/* ============================================================
+   DAILY EXPENSE TRACKER
+   COMPLETE CUSTOM CSS
+============================================================ */
+
+
+/* ============================================================
+   GLOBAL
+============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+
+    margin: 0;
+
+    padding: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5f7fb,
+            #eef2f7
+        );
+
+    color: #212529;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.header-section {
+
+    background: linear-gradient(
+337deg, #00398c, #001635);
+
+    color: white;
+
+    padding: 25px 0;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.12);
+
+}
+
+
+.header-content {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+}
+
+
+.header-content h2 {
+
+    margin: 0;
+
+    font-weight: 700;
+
+}
+
+
+.header-content p {
+
+    margin: 6px 0 0;
+
+    opacity: 0.9;
+
+}
+
+
+.date-display {
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   MAIN CONTAINER
+============================================================ */
+
+.main-container {
+
+    padding-top: 35px;
+
+    padding-bottom: 50px;
+
+}
+
+
+/* ============================================================
+   EXPENSE CARD
+============================================================ */
+
+.expense-card {
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 10px 35px
+        rgba(0, 0, 0, 0.08);
+
+    margin-bottom: 25px;
+
+}
+
+
+/* ============================================================
+   FORM LABEL
+============================================================ */
+
+.form-label {
+
+    font-weight: 600;
+
+    color: #343a40;
+
+}
+
+
+.required-star {
+
+    color: #dc3545;
+
+    font-weight: bold;
+
+}
+
+
+/* ============================================================
+   INPUTS
+============================================================ */
+
+.form-control,
+.form-select {
+
+    min-height: 45px;
+
+    border-radius: 9px;
+
+    border: 1px solid #ced4da;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+
+}
+
+
+.form-control:focus,
+.form-select:focus {
+
+    border-color: #0d6efd;
+
+    box-shadow:
+        0 0 0 0.2rem
+        rgba(13, 110, 253, 0.15);
+
+}
+
+
+/* ============================================================
+   TEXTAREA
+============================================================ */
+
+textarea.form-control {
+
+    min-height: 90px;
+
+    resize: vertical;
+
+}
+
+
+/* ============================================================
+   AMOUNT INPUT
+============================================================ */
+
+.amount-input {
+
+    position: relative;
+
+}
+
+
+.amount-input > span {
+
+    position: absolute;
+
+    left: 14px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    font-weight: 700;
+
+    color: #495057;
+
+    z-index: 2;
+
+}
+
+
+.amount-input input {
+
+    padding-left: 35px;
+
+}
+
+
+/* ============================================================
+   BUTTON AREA
+============================================================ */
+
+.button-area {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 28px;
+
+}
+
+
+.button-area .btn {
+
+    min-height: 45px;
+
+    border-radius: 9px;
+
+    font-weight: 600;
+
+}
+
+
+/* ============================================================
+   ADD EXPENSE TYPE BUTTON
+============================================================ */
+
+#addExpenseTypeBtn {
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+/* ============================================================
+   SUMMARY CARDS
+============================================================ */
+
+.summary-card {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, 0.07);
+
+}
+
+
+.summary-icon {
+
+    width: 55px;
+
+    height: 55px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(13, 110, 253, 0.1);
+
+    color: #0d6efd;
+
+    font-size: 22px;
+
+}
+
+
+.summary-card span {
+
+    color: #6c757d;
+
+    font-size: 14px;
+
+}
+
+
+.summary-card h3 {
+
+    margin: 4px 0 0;
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   FILTER SECTION
+============================================================ */
+
+.filter-section {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, 0.06);
+
+}
+
+
+.filter-section .btn {
+
+    min-height: 45px;
+
+}
+
+
+/* ============================================================
+   TABLE
+============================================================ */
+
+.table {
+
+    margin-bottom: 0;
+
+}
+
+
+.table thead th {
+
+    background:
+        #0d6efd;
+
+    color: white;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+}
+
+
+.table tbody td {
+
+    vertical-align: middle;
+
+}
+
+
+.table tfoot td {
+
+    background: #f8f9fa;
+
+    font-size: 15px;
+
+}
+
+
+/* ============================================================
+   TABLE DESCRIPTION
+============================================================ */
+
+.table td:nth-child(7) {
+
+    min-width: 180px;
+
+    max-width: 350px;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+============================================================ */
+
+.action-cell .btn {
+
+    width: 36px;
+
+    height: 36px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ============================================================
+   PAGINATION
+============================================================ */
+
+.pagination-wrapper {
+
+    margin-bottom: 30px;
+
+}
+
+
+.pagination-wrapper button {
+
+    min-width: 40px;
+
+    min-height: 38px;
+
+    border-radius: 8px;
+
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+.modal-content {
+
+    border: none;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 15px 50px
+        rgba(0, 0, 0, 0.2);
+
+}
+
+
+.modal-header {
+
+    background:
+        #f8f9fa;
+
+}
+
+
+.modal-title {
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+.toast {
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, 0.15);
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+
+    .header-content {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .date-display {
+
+        white-space: normal;
+
+    }
+
+
+    .expense-card {
+
+        padding: 18px;
+
+        border-radius: 14px;
+
+    }
+
+
+    .button-area {
+
+        flex-direction: column;
+
+    }
+
+
+    .button-area .btn {
+
+        width: 100%;
+
+    }
+
+
+    #addExpenseTypeBtn {
+
+        padding-left: 12px;
+
+        padding-right: 12px;
+
+    }
+
+
+    .filter-section {
+
+        padding: 16px;
+
+    }
+
+
+}
+
+
+/* ============================================================
+   PRINT
+============================================================ */
+
+@media print {
+
+    body {
+
+        background: white !important;
+
+    }
+
+
+    .expense-card {
+
+        box-shadow: none !important;
+
+    }
+
+
+}
