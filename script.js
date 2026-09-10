@@ -2,21 +2,21 @@
    DAILY EXPENSE TRACKER
    COMPLETE JAVASCRIPT
 
-   FEATURES
-   ------------------------------------------------------------
-   1. Supabase connection
-   2. Add expense
-   3. Load expense types
-   4. Add new expense type
-   5. Duplicate expense type prevention
-   6. Load expenses
-   7. Filter expenses
-   8. Pagination
-   9. Edit expense
-   10. Delete expense
-   11. Print expenses
-   12. Save expenses as PDF through browser print
-   13. Dashboard navigation
+   FEATURES:
+   - Supabase connection
+   - Add expense
+   - Add expense type
+   - Expense type loading
+   - Expense listing
+   - Filtering
+   - Pagination
+   - Page total
+   - Grand total
+   - Edit
+   - Delete
+   - Dashboard
+   - PDF generation
+   - Responsive navigation
 ============================================================ */
 
 
@@ -28,15 +28,19 @@ const SUPABASE_URL =
     "https://sdkhtfovazarqvzplagq.supabase.co";
 
 
+/*
+   IMPORTANT:
+
+   Replace this with your existing Supabase ANON PUBLIC KEY.
+
+   Do NOT use the service_role key in frontend JavaScript.
+*/
+
 const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNka2h0Zm92YXphcnF2enBsYWdxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODQzMDA1OCwiZXhwIjoyMTA0MDA2MDU4fQ.Rf9sKrsoua5Am_4AwHX2Qdib4NmOzOzBaRfyJndLt9M";
 
 
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
+let supabaseClient = null;
 
 
 /* ============================================================
@@ -57,72 +61,177 @@ let selectedCreator = "ALL";
 
 let selectedExpenseType = "ALL";
 
-let deleteExpenseId = null;
-
 let editingExpenseId = null;
+
+let deletingExpenseId = null;
+
+
+/* ============================================================
+   INITIALIZE SUPABASE
+============================================================ */
+
+function initializeSupabase() {
+
+    if (
+        typeof window.supabase === "undefined"
+    ) {
+
+        console.error(
+            "Supabase library was not loaded."
+        );
+
+        return false;
+    }
+
+
+    if (
+        !SUPABASE_URL ||
+        !SUPABASE_ANON_KEY ||
+        SUPABASE_ANON_KEY ===
+            "YOUR_SUPABASE_ANON_KEY"
+    ) {
+
+        console.error(
+            "Supabase credentials are not configured."
+        );
+
+        showError(
+            "Please add your Supabase anon public key in script.js."
+        );
+
+        return false;
+    }
+
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+
+    return true;
+}
 
 
 /* ============================================================
    PAGE LOAD
 ============================================================ */
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
 
-    setCurrentDate();
-
-    initializeCommonNavigation();
-
-
-    /* --------------------------------------------------------
-       INDEX PAGE
-    -------------------------------------------------------- */
-
-    if (document.getElementById("expenseForm")) {
-
-        setFormDate();
-
-        setCurrentTime();
-
-        await loadExpenseTypes();
-
-        await setNextSerialNumber();
-
-        initializeIndexEvents();
-
-    }
+        setCurrentDate();
 
 
-    /* --------------------------------------------------------
-       EXPENSE PAGE
-    -------------------------------------------------------- */
+        if (
+            !initializeSupabase()
+        ) {
 
-    if (document.getElementById("expenseTableBody")) {
-
-        await loadExpenseTypes();
-
-        await loadExpenseTable();
-
-        initializeFilters();
-
-        initializePagination();
-
-    }
+            return;
+        }
 
 
-    /* --------------------------------------------------------
-       DASHBOARD PAGE
-    -------------------------------------------------------- */
+        const page =
+            getCurrentPage();
 
-    if (
-        document.getElementById("dashboardContainer") ||
-        document.getElementById("monthlyComparison")
-    ) {
 
-        await loadDashboard();
+        if (
+            page === "index.html" ||
+            page === ""
+        ) {
+
+            await initializeIndexPage();
+
+        }
+
+
+        else if (
+            page === "expense.html"
+        ) {
+
+            await initializeExpensePage();
+
+        }
+
+
+        else if (
+            page === "dashboard.html"
+        ) {
+
+            await initializeDashboardPage();
+
+        }
 
     }
+);
 
-});
+
+/* ============================================================
+   GET CURRENT PAGE
+============================================================ */
+
+function getCurrentPage() {
+
+    let path =
+        window.location.pathname
+            .split("/")
+            .pop()
+            .toLowerCase();
+
+
+    return path;
+}
+
+
+/* ============================================================
+   INDEX PAGE INITIALIZATION
+============================================================ */
+
+async function initializeIndexPage() {
+
+    setFormDate();
+
+    setCurrentTime();
+
+    await setNextSerialNumber();
+
+    await loadExpenseTypes();
+
+    initializeExpenseTypeModal();
+
+    initializeExpenseForm();
+
+}
+
+
+/* ============================================================
+   EXPENSE PAGE INITIALIZATION
+============================================================ */
+
+async function initializeExpensePage() {
+
+    initializeExpenseFilters();
+
+    initializeRowsPerPage();
+
+    await loadExpenseTypes();
+
+    await loadExpenseTable();
+
+}
+
+
+/* ============================================================
+   DASHBOARD PAGE INITIALIZATION
+============================================================ */
+
+async function initializeDashboardPage() {
+
+    await loadDashboard();
+
+}
 
 
 /* ============================================================
@@ -132,14 +241,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 function setCurrentDate() {
 
     const element =
-        document.getElementById("currentDate");
+        document.getElementById(
+            "currentDate"
+        );
+
 
     if (!element) {
         return;
     }
 
 
-    const now = new Date();
+    const now =
+        new Date();
 
 
     element.textContent =
@@ -147,12 +260,11 @@ function setCurrentDate() {
             "en-IN",
             {
                 weekday: "long",
-                year: "numeric",
+                day: "2-digit",
                 month: "long",
-                day: "numeric"
+                year: "numeric"
             }
         );
-
 }
 
 
@@ -163,30 +275,38 @@ function setCurrentDate() {
 function setFormDate() {
 
     const dateInput =
-        document.getElementById("expenseDate");
+        document.getElementById(
+            "expenseDate"
+        );
+
 
     if (!dateInput) {
         return;
     }
 
 
-    const now = new Date();
+    const now =
+        new Date();
+
 
     const year =
         now.getFullYear();
 
+
     const month =
-        String(now.getMonth() + 1)
-            .padStart(2, "0");
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
 
     const day =
-        String(now.getDate())
-            .padStart(2, "0");
+        String(
+            now.getDate()
+        ).padStart(2, "0");
 
 
     dateInput.value =
         `${year}-${month}-${day}`;
-
 }
 
 
@@ -197,929 +317,39 @@ function setFormDate() {
 function setCurrentTime() {
 
     const timeInput =
-        document.getElementById("expenseTime");
+        document.getElementById(
+            "expenseTime"
+        );
+
 
     if (!timeInput) {
         return;
     }
 
 
-    const now = new Date();
+    const now =
+        new Date();
 
 
     const hours =
-        String(now.getHours())
-            .padStart(2, "0");
+        String(
+            now.getHours()
+        ).padStart(2, "0");
 
 
     const minutes =
-        String(now.getMinutes())
-            .padStart(2, "0");
+        String(
+            now.getMinutes()
+        ).padStart(2, "0");
 
 
     timeInput.value =
         `${hours}:${minutes}`;
-
 }
 
 
 /* ============================================================
-   LOAD EXPENSE TYPES
-============================================================ */
-
-async function loadExpenseTypes() {
-
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
-
-            .from("expense_types")
-
-            .select("id, name")
-
-            .order("name", {
-                ascending: true
-            });
-
-
-        if (error) {
-
-            console.error(
-                "Expense type loading error:",
-                error
-            );
-
-            showError(
-                "Unable to load expense types."
-            );
-
-            return;
-
-        }
-
-
-        allExpenseTypes =
-            data || [];
-
-
-        populateExpenseTypeDropdowns();
-
-
-    }
-    catch (error) {
-
-        console.error(
-            "Unexpected error loading expense types:",
-            error
-        );
-
-        showError(
-            "Unexpected error while loading expense types."
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   POPULATE EXPENSE TYPE DROPDOWNS
-============================================================ */
-
-function populateExpenseTypeDropdowns() {
-
-
-    /* --------------------------------------------------------
-       INDEX DROPDOWN
-    -------------------------------------------------------- */
-
-    const expenseType =
-        document.getElementById("expenseType");
-
-
-    if (expenseType) {
-
-        expenseType.innerHTML =
-            `<option value="">
-                Select Type
-             </option>`;
-
-
-        allExpenseTypes.forEach(function (type) {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                type.name;
-
-            option.textContent =
-                type.name;
-
-            expenseType.appendChild(option);
-
-        });
-
-    }
-
-
-    /* --------------------------------------------------------
-       EXPENSE FILTER
-    -------------------------------------------------------- */
-
-    const expenseTypeFilter =
-        document.getElementById(
-            "expenseTypeFilter"
-        );
-
-
-    if (expenseTypeFilter) {
-
-        const currentValue =
-            expenseTypeFilter.value;
-
-
-        expenseTypeFilter.innerHTML =
-            `<option value="ALL">
-                All Expense Types
-             </option>`;
-
-
-        allExpenseTypes.forEach(function (type) {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                type.name;
-
-            option.textContent =
-                type.name;
-
-            expenseTypeFilter.appendChild(
-                option
-            );
-
-        });
-
-
-        if (
-            [...expenseTypeFilter.options]
-                .some(
-                    option =>
-                        option.value === currentValue
-                )
-        ) {
-
-            expenseTypeFilter.value =
-                currentValue;
-
-        }
-
-    }
-
-
-    /* --------------------------------------------------------
-       EDIT DROPDOWN
-    -------------------------------------------------------- */
-
-    const editExpenseType =
-        document.getElementById(
-            "editExpenseType"
-        );
-
-
-    if (editExpenseType) {
-
-        const currentValue =
-            editExpenseType.value;
-
-
-        editExpenseType.innerHTML =
-            `<option value="">
-                Select Type
-             </option>`;
-
-
-        allExpenseTypes.forEach(function (type) {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                type.name;
-
-            option.textContent =
-                type.name;
-
-            editExpenseType.appendChild(
-                option
-            );
-
-        });
-
-
-        if (
-            [...editExpenseType.options]
-                .some(
-                    option =>
-                        option.value === currentValue
-                )
-        ) {
-
-            editExpenseType.value =
-                currentValue;
-
-        }
-
-    }
-
-}
-
-
-/* ============================================================
-   INITIALIZE INDEX EVENTS
-============================================================ */
-
-function initializeIndexEvents() {
-
-
-    const expenseForm =
-        document.getElementById(
-            "expenseForm"
-        );
-
-
-    if (expenseForm) {
-
-        expenseForm.addEventListener(
-            "submit",
-            saveExpense
-        );
-
-    }
-
-
-    const addExpenseTypeBtn =
-        document.getElementById(
-            "addExpenseTypeBtn"
-        );
-
-
-    if (addExpenseTypeBtn) {
-
-        addExpenseTypeBtn.addEventListener(
-            "click",
-            openAddExpenseTypeModal
-        );
-
-    }
-
-
-    const saveExpenseTypeBtn =
-        document.getElementById(
-            "saveExpenseTypeBtn"
-        );
-
-
-    if (saveExpenseTypeBtn) {
-
-        saveExpenseTypeBtn.addEventListener(
-            "click",
-            addNewExpenseType
-        );
-
-    }
-
-
-    const newExpenseType =
-        document.getElementById(
-            "newExpenseType"
-        );
-
-
-    if (newExpenseType) {
-
-        newExpenseType.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (event.key === "Enter") {
-
-                    event.preventDefault();
-
-                    addNewExpenseType();
-
-                }
-
-            }
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   OPEN ADD EXPENSE TYPE MODAL
-============================================================ */
-
-function openAddExpenseTypeModal() {
-
-    const input =
-        document.getElementById(
-            "newExpenseType"
-        );
-
-
-    const error =
-        document.getElementById(
-            "expenseTypeError"
-        );
-
-
-    if (input) {
-        input.value = "";
-    }
-
-
-    if (error) {
-
-        error.style.display =
-            "none";
-
-        error.textContent =
-            "";
-
-    }
-
-
-    const modalElement =
-        document.getElementById(
-            "addExpenseTypeModal"
-        );
-
-
-    if (!modalElement) {
-        return;
-    }
-
-
-    const modal =
-        bootstrap.Modal.getOrCreateInstance(
-            modalElement
-        );
-
-
-    modal.show();
-
-
-    setTimeout(
-        function () {
-
-            if (input) {
-                input.focus();
-            }
-
-        },
-        300
-    );
-
-}
-
-
-/* ============================================================
-   ADD NEW EXPENSE TYPE
-============================================================ */
-
-async function addNewExpenseType() {
-
-    const input =
-        document.getElementById(
-            "newExpenseType"
-        );
-
-
-    const errorElement =
-        document.getElementById(
-            "expenseTypeError"
-        );
-
-
-    const button =
-        document.getElementById(
-            "saveExpenseTypeBtn"
-        );
-
-
-    if (!input) {
-        return;
-    }
-
-
-    const name =
-        input.value.trim();
-
-
-    /* --------------------------------------------------------
-       VALIDATION
-    -------------------------------------------------------- */
-
-    if (!name) {
-
-        showExpenseTypeModalError(
-            "Please enter an expense type."
-        );
-
-        input.focus();
-
-        return;
-
-    }
-
-
-    if (name.length < 2) {
-
-        showExpenseTypeModalError(
-            "Expense type must contain at least 2 characters."
-        );
-
-        input.focus();
-
-        return;
-
-    }
-
-
-    /* --------------------------------------------------------
-       CHECK DUPLICATE LOCALLY
-    -------------------------------------------------------- */
-
-    const duplicate =
-        allExpenseTypes.some(
-            type =>
-                type.name.trim().toLowerCase()
-                ===
-                name.toLowerCase()
-        );
-
-
-    if (duplicate) {
-
-        showExpenseTypeModalError(
-            "This expense type already exists."
-        );
-
-        input.focus();
-
-        return;
-
-    }
-
-
-    /* --------------------------------------------------------
-       DISABLE BUTTON
-    -------------------------------------------------------- */
-
-    if (button) {
-
-        button.disabled =
-            true;
-
-        button.innerHTML =
-            `<span class="spinner-border spinner-border-sm me-1"></span>
-             Saving...`;
-
-    }
-
-
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
-
-            .from("expense_types")
-
-            .insert([
-                {
-                    name: name
-                }
-            ])
-
-            .select()
-            .single();
-
-
-        if (error) {
-
-            console.error(
-                "Add expense type error:",
-                error
-            );
-
-
-            if (
-                error.code === "23505"
-            ) {
-
-                showExpenseTypeModalError(
-                    "This expense type already exists."
-                );
-
-            }
-            else {
-
-                showExpenseTypeModalError(
-                    error.message ||
-                    "Unable to add expense type."
-                );
-
-            }
-
-
-            return;
-
-        }
-
-
-        /* ----------------------------------------------------
-           ADD TO LOCAL ARRAY
-        ---------------------------------------------------- */
-
-        if (data) {
-
-            allExpenseTypes.push(data);
-
-            allExpenseTypes.sort(
-                function (a, b) {
-
-                    return a.name.localeCompare(
-                        b.name
-                    );
-
-                }
-            );
-
-        }
-
-
-        populateExpenseTypeDropdowns();
-
-
-        /* ----------------------------------------------------
-           SELECT NEW TYPE
-        ---------------------------------------------------- */
-
-        const expenseType =
-            document.getElementById(
-                "expenseType"
-            );
-
-
-        if (expenseType) {
-
-            expenseType.value =
-                name;
-
-        }
-
-
-        /* ----------------------------------------------------
-           CLOSE MODAL
-        ---------------------------------------------------- */
-
-        const modalElement =
-            document.getElementById(
-                "addExpenseTypeModal"
-            );
-
-
-        if (modalElement) {
-
-            const modal =
-                bootstrap.Modal.getInstance(
-                    modalElement
-                );
-
-
-            if (modal) {
-                modal.hide();
-            }
-
-        }
-
-
-        showSuccess(
-            "New expense type added successfully!"
-        );
-
-
-    }
-    catch (error) {
-
-        console.error(
-            "Unexpected add expense type error:",
-            error
-        );
-
-
-        showExpenseTypeModalError(
-            "Unexpected error. Please try again."
-        );
-
-    }
-    finally {
-
-        if (button) {
-
-            button.disabled =
-                false;
-
-            button.innerHTML =
-                `<i class="fa-solid fa-plus"></i>
-                 Add Expense Type`;
-
-        }
-
-    }
-
-}
-
-
-/* ============================================================
-   MODAL ERROR
-============================================================ */
-
-function showExpenseTypeModalError(message) {
-
-    const element =
-        document.getElementById(
-            "expenseTypeError"
-        );
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.textContent =
-        message;
-
-
-    element.style.display =
-        "block";
-
-}
-
-
-/* ============================================================
-   SAVE EXPENSE
-============================================================ */
-
-async function saveExpense(event) {
-
-    event.preventDefault();
-
-
-    const creator =
-        document.getElementById(
-            "creator"
-        ).value.trim();
-
-
-    const expenseDate =
-        document.getElementById(
-            "expenseDate"
-        ).value;
-
-
-    const expenseTime =
-        document.getElementById(
-            "expenseTime"
-        ).value;
-
-
-    const expenseType =
-        document.getElementById(
-            "expenseType"
-        ).value;
-
-
-    const category =
-        document.getElementById(
-            "category"
-        ).value;
-
-
-    const comment =
-        document.getElementById(
-            "comment"
-        ).value.trim();
-
-
-    const amount =
-        document.getElementById(
-            "amount"
-        ).value;
-
-
-    /* --------------------------------------------------------
-       VALIDATION
-    -------------------------------------------------------- */
-
-    if (!creator) {
-
-        showError(
-            "Please enter creator name."
-        );
-
-        return;
-
-    }
-
-
-    if (!expenseDate) {
-
-        showError(
-            "Please select expense date."
-        );
-
-        return;
-
-    }
-
-
-    if (!expenseType) {
-
-        showError(
-            "Please select expense type."
-        );
-
-        return;
-
-    }
-
-
-    if (!category) {
-
-        showError(
-            "Please select category."
-        );
-
-        return;
-
-    }
-
-
-    if (!comment) {
-
-        showError(
-            "Please enter expense description."
-        );
-
-        return;
-
-    }
-
-
-    if (!amount || Number(amount) <= 0) {
-
-        showError(
-            "Please enter a valid amount."
-        );
-
-        return;
-
-    }
-
-
-    const submitButton =
-        document.querySelector(
-            "#expenseForm button[type='submit']"
-        );
-
-
-    if (submitButton) {
-
-        submitButton.disabled =
-            true;
-
-        submitButton.innerHTML =
-            `<span class="spinner-border spinner-border-sm me-2"></span>
-             Saving...`;
-
-    }
-
-
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
-
-            .from("expenses")
-
-            .insert([
-                {
-                    creator: creator,
-
-                    expense_date: expenseDate,
-
-                    expense_time:
-                        expenseTime || null,
-
-                    expense_type: expenseType,
-
-                    category: category,
-
-                    comment: comment,
-
-                    amount: Number(amount)
-                }
-            ])
-
-            .select();
-
-
-        if (error) {
-
-            console.error(
-                "Save expense error:",
-                error
-            );
-
-            showError(
-                error.message ||
-                "Unable to save expense."
-            );
-
-            return;
-
-        }
-
-
-        console.log(
-            "Expense saved:",
-            data
-        );
-
-
-        showSuccess(
-            "Expense saved successfully!"
-        );
-
-
-        document.getElementById(
-            "expenseForm"
-        ).reset();
-
-
-        setFormDate();
-
-        setCurrentTime();
-
-        await setNextSerialNumber();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Unexpected save error:",
-            error
-        );
-
-        showError(
-            "Unexpected error while saving expense."
-        );
-
-    }
-    finally {
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                false;
-
-            submitButton.innerHTML =
-                `<i class="fa-solid fa-floppy-disk"></i>
-                 Submit Expense`;
-
-        }
-
-    }
-
-}
-
-
-/* ============================================================
-   GET NEXT SERIAL NUMBER
+   NEXT SERIAL NUMBER
 ============================================================ */
 
 async function setNextSerialNumber() {
@@ -1140,46 +370,874 @@ async function setNextSerialNumber() {
         const {
             count,
             error
-        } = await supabaseClient
-
-            .from("expenses")
-
-            .select("id", {
-                count: "exact",
-                head: true
-            });
+        } =
+            await supabaseClient
+                .from("expenses")
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
 
 
         if (error) {
-
-            console.error(
-                "Serial number error:",
-                error
-            );
-
-            serialInput.value =
-                "";
-
-            return;
-
+            throw error;
         }
 
 
         serialInput.value =
-            (count || 0) + 1;
+            Number(count || 0) + 1;
 
     }
+
     catch (error) {
 
         console.error(
+            "Serial number error:",
             error
         );
 
+
         serialInput.value =
-            "";
+            "1";
+    }
+}
+
+
+/* ============================================================
+   LOAD EXPENSE TYPES
+============================================================ */
+
+async function loadExpenseTypes() {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("expense_types")
+                .select("*")
+                .order(
+                    "name",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        allExpenseTypes =
+            data || [];
+
+
+        populateExpenseTypeDropdowns();
 
     }
 
+    catch (error) {
+
+        console.error(
+            "Expense type loading error:",
+            error
+        );
+
+
+        const select =
+            document.getElementById(
+                "expenseType"
+            );
+
+
+        if (select) {
+
+            select.innerHTML =
+                `<option value="">
+                    Unable to load expense types
+                 </option>`;
+        }
+    }
+}
+
+
+/* ============================================================
+   POPULATE EXPENSE TYPE DROPDOWNS
+============================================================ */
+
+function populateExpenseTypeDropdowns() {
+
+    const mainSelect =
+        document.getElementById(
+            "expenseType"
+        );
+
+
+    const editSelect =
+        document.getElementById(
+            "editExpenseType"
+        );
+
+
+    const filterSelect =
+        document.getElementById(
+            "expenseTypeFilter"
+        );
+
+
+    if (mainSelect) {
+
+        mainSelect.innerHTML =
+            `<option value="">
+                Select Expense Type
+             </option>`;
+
+
+        allExpenseTypes.forEach(
+            function (type) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    type.name;
+
+
+                option.textContent =
+                    type.name;
+
+
+                mainSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    if (editSelect) {
+
+        editSelect.innerHTML =
+            `<option value="">
+                Select Expense Type
+             </option>`;
+
+
+        allExpenseTypes.forEach(
+            function (type) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    type.name;
+
+
+                option.textContent =
+                    type.name;
+
+
+                editSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+    }
+
+
+    if (filterSelect) {
+
+        const currentValue =
+            filterSelect.value ||
+            "ALL";
+
+
+        filterSelect.innerHTML =
+            `<option value="ALL">
+                All Expense Types
+             </option>`;
+
+
+        allExpenseTypes.forEach(
+            function (type) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    type.name;
+
+
+                option.textContent =
+                    type.name;
+
+
+                filterSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        if (
+            [...filterSelect.options]
+                .some(
+                    option =>
+                        option.value ===
+                        currentValue
+                )
+        ) {
+
+            filterSelect.value =
+                currentValue;
+
+        }
+
+    }
+}
+
+
+/* ============================================================
+   EXPENSE TYPE MODAL
+============================================================ */
+
+function initializeExpenseTypeModal() {
+
+    const addButton =
+        document.getElementById(
+            "addExpenseTypeBtn"
+        );
+
+
+    const saveButton =
+        document.getElementById(
+            "saveExpenseTypeBtn"
+        );
+
+
+    const input =
+        document.getElementById(
+            "newExpenseType"
+        );
+
+
+    if (
+        !addButton ||
+        !saveButton
+    ) {
+
+        return;
+    }
+
+
+    addButton.addEventListener(
+        "click",
+        function () {
+
+            const modalElement =
+                document.getElementById(
+                    "addExpenseTypeModal"
+                );
+
+
+            const modal =
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        modalElement
+                    );
+
+
+            clearExpenseTypeError();
+
+
+            if (input) {
+                input.value = "";
+            }
+
+
+            modal.show();
+
+
+            setTimeout(
+                function () {
+
+                    if (input) {
+                        input.focus();
+                    }
+
+                },
+                300
+            );
+
+        }
+    );
+
+
+    saveButton.addEventListener(
+        "click",
+        addNewExpenseType
+    );
+
+
+    if (input) {
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    addNewExpenseType();
+
+                }
+
+            }
+        );
+
+    }
+}
+
+
+/* ============================================================
+   ADD NEW EXPENSE TYPE
+============================================================ */
+
+async function addNewExpenseType() {
+
+    const input =
+        document.getElementById(
+            "newExpenseType"
+        );
+
+
+    const saveButton =
+        document.getElementById(
+            "saveExpenseTypeBtn"
+        );
+
+
+    if (
+        !input ||
+        !saveButton
+    ) {
+
+        return;
+    }
+
+
+    clearExpenseTypeError();
+
+
+    const name =
+        input.value.trim();
+
+
+    if (!name) {
+
+        showExpenseTypeError(
+            "Please enter an expense type."
+        );
+
+        input.focus();
+
+        return;
+    }
+
+
+    if (name.length < 2) {
+
+        showExpenseTypeError(
+            "Expense type must contain at least 2 characters."
+        );
+
+        input.focus();
+
+        return;
+    }
+
+
+    const alreadyExists =
+        allExpenseTypes.some(
+            function (type) {
+
+                return (
+                    type.name
+                        .trim()
+                        .toLowerCase() ===
+                    name.toLowerCase()
+                );
+
+            }
+        );
+
+
+    if (alreadyExists) {
+
+        showExpenseTypeError(
+            "This expense type already exists."
+        );
+
+        input.focus();
+
+        return;
+    }
+
+
+    const originalHTML =
+        saveButton.innerHTML;
+
+
+    saveButton.disabled = true;
+
+    saveButton.innerHTML =
+        `<span class="spinner-border spinner-border-sm me-2"></span>
+         Saving...`;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("expense_types")
+                .insert(
+                    [
+                        {
+                            name: name
+                        }
+                    ]
+                )
+                .select()
+                .single();
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadExpenseTypes();
+
+
+        const expenseType =
+            document.getElementById(
+                "expenseType"
+            );
+
+
+        if (expenseType) {
+
+            expenseType.value =
+                data.name;
+
+        }
+
+
+        const modalElement =
+            document.getElementById(
+                "addExpenseTypeModal"
+            );
+
+
+        const modal =
+            bootstrap.Modal
+                .getInstance(
+                    modalElement
+                );
+
+
+        if (modal) {
+            modal.hide();
+        }
+
+
+        showSuccess(
+            "Expense type added successfully!"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Add expense type error:",
+            error
+        );
+
+
+        if (
+            error.code ===
+            "23505"
+        ) {
+
+            showExpenseTypeError(
+                "This expense type already exists."
+            );
+
+        }
+
+        else {
+
+            showExpenseTypeError(
+                error.message ||
+                "Unable to add expense type."
+            );
+
+        }
+
+    }
+
+    finally {
+
+        saveButton.disabled = false;
+
+        saveButton.innerHTML =
+            originalHTML;
+
+    }
+}
+
+
+/* ============================================================
+   EXPENSE TYPE ERROR
+============================================================ */
+
+function showExpenseTypeError(message) {
+
+    const element =
+        document.getElementById(
+            "expenseTypeError"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        message;
+
+
+    element.style.display =
+        "block";
+}
+
+
+/* ============================================================
+   CLEAR EXPENSE TYPE ERROR
+============================================================ */
+
+function clearExpenseTypeError() {
+
+    const element =
+        document.getElementById(
+            "expenseTypeError"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent = "";
+
+    element.style.display =
+        "none";
+}
+
+
+/* ============================================================
+   EXPENSE FORM
+============================================================ */
+
+function initializeExpenseForm() {
+
+    const form =
+        document.getElementById(
+            "expenseForm"
+        );
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            await saveExpense();
+
+        }
+    );
+}
+
+
+/* ============================================================
+   SAVE EXPENSE
+============================================================ */
+
+async function saveExpense() {
+
+    const creator =
+        document.getElementById(
+            "creator"
+        )?.value.trim();
+
+
+    const expenseDate =
+        document.getElementById(
+            "expenseDate"
+        )?.value;
+
+
+    const expenseTime =
+        document.getElementById(
+            "expenseTime"
+        )?.value;
+
+
+    const expenseType =
+        document.getElementById(
+            "expenseType"
+        )?.value;
+
+
+    const category =
+        document.getElementById(
+            "category"
+        )?.value;
+
+
+    const comment =
+        document.getElementById(
+            "comment"
+        )?.value.trim();
+
+
+    const amount =
+        Number(
+            document.getElementById(
+                "amount"
+            )?.value
+        );
+
+
+    const submitButton =
+        document.getElementById(
+            "submitExpenseBtn"
+        );
+
+
+    /* ========================================================
+       VALIDATION
+    ======================================================== */
+
+    if (!creator) {
+
+        showError(
+            "Please enter the creator name."
+        );
+
+        return;
+    }
+
+
+    if (!expenseDate) {
+
+        showError(
+            "Please select the expense date."
+        );
+
+        return;
+    }
+
+
+    if (!expenseType) {
+
+        showError(
+            "Please select an expense type."
+        );
+
+        return;
+    }
+
+
+    if (!category) {
+
+        showError(
+            "Please select a category."
+        );
+
+        return;
+    }
+
+
+    if (!comment) {
+
+        showError(
+            "Please enter the expense description."
+        );
+
+        return;
+    }
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
+        showError(
+            "Please enter a valid expense amount."
+        );
+
+        return;
+    }
+
+
+    /* ========================================================
+       LOADING
+    ======================================================== */
+
+    const originalHTML =
+        submitButton
+            ? submitButton.innerHTML
+            : "";
+
+
+    if (submitButton) {
+
+        submitButton.disabled = true;
+
+        submitButton.innerHTML =
+            `<span class="spinner-border spinner-border-sm me-2"></span>
+             Saving...`;
+
+    }
+
+
+    try {
+
+        const expenseData = {
+
+            creator:
+                creator,
+
+            expense_date:
+                expenseDate,
+
+            expense_time:
+                expenseTime || null,
+
+            expense_type:
+                expenseType,
+
+            category:
+                category,
+
+            comment:
+                comment,
+
+            amount:
+                amount
+
+        };
+
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("expenses")
+                .insert(
+                    [expenseData]
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        showSuccess(
+            "Expense saved successfully!"
+        );
+
+
+        document
+            .getElementById(
+                "expenseForm"
+            )
+            .reset();
+
+
+        setFormDate();
+
+        setCurrentTime();
+
+        await setNextSerialNumber();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Save expense error:",
+            error
+        );
+
+
+        showError(
+            error.message ||
+            "Unable to save expense."
+        );
+
+    }
+
+    finally {
+
+        if (submitButton) {
+
+            submitButton.disabled = false;
+
+            submitButton.innerHTML =
+                originalHTML;
+
+        }
+
+    }
 }
 
 
@@ -1189,35 +1247,44 @@ async function setNextSerialNumber() {
 
 async function loadExpenseTable() {
 
+    const tbody =
+        document.getElementById(
+            "expenseTableBody"
+        );
+
+
+    if (tbody) {
+
+        tbody.innerHTML =
+            `<tr class="loading-row">
+                <td colspan="9">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Loading expenses...
+                </td>
+             </tr>`;
+
+    }
+
+
     try {
 
         const {
             data,
             error
-        } = await supabaseClient
-
-            .from("expenses")
-
-            .select("*")
-
-            .order("id", {
-                ascending: true
-            });
+        } =
+            await supabaseClient
+                .from("expenses")
+                .select("*")
+                .order(
+                    "id",
+                    {
+                        ascending: true
+                    }
+                );
 
 
         if (error) {
-
-            console.error(
-                "Load expenses error:",
-                error
-            );
-
-            showError(
-                "Unable to load expenses."
-            );
-
-            return;
-
+            throw error;
         }
 
 
@@ -1225,348 +1292,54 @@ async function loadExpenseTable() {
             data || [];
 
 
-        filteredExpenses =
-            [...allExpenses];
+        updateSummaryCards();
 
 
-        updateCreatorFilter();
+        initializeCreatorFilterOptions();
 
-        applyFilters();
-
-
-        updateSummary();
-
-
-        renderExpenseTable();
-
-
-        renderPagination();
-
+        applyExpenseFilters();
 
     }
+
     catch (error) {
 
         console.error(
-            "Unexpected expense loading error:",
+            "Load expenses error:",
             error
         );
 
+
+        if (tbody) {
+
+            tbody.innerHTML =
+                `<tr>
+                    <td colspan="9"
+                        class="text-center text-danger py-4">
+
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+                        Unable to load expenses.
+
+                    </td>
+                 </tr>`;
+
+        }
+
+
         showError(
-            "Unexpected error while loading expenses."
+            error.message ||
+            "Unable to load expenses."
         );
 
     }
-
 }
 
 
 /* ============================================================
-   UPDATE CREATOR FILTER
+   SUMMARY CARDS
 ============================================================ */
 
-function updateCreatorFilter() {
-
-    const creatorFilter =
-        document.getElementById(
-            "creatorFilter"
-        );
-
-
-    if (!creatorFilter) {
-        return;
-    }
-
-
-    const currentValue =
-        creatorFilter.value ||
-        selectedCreator;
-
-
-    const creators =
-        [
-            ...new Set(
-                allExpenses
-                    .map(
-                        expense =>
-                            expense.creator
-                    )
-                    .filter(Boolean)
-            )
-        ]
-        .sort(
-            function (a, b) {
-
-                return a.localeCompare(b);
-
-            }
-        );
-
-
-    creatorFilter.innerHTML =
-        `<option value="ALL">
-            All Creators
-         </option>`;
-
-
-    creators.forEach(function (creator) {
-
-        const option =
-            document.createElement("option");
-
-        option.value =
-            creator;
-
-        option.textContent =
-            creator;
-
-        creatorFilter.appendChild(
-            option
-        );
-
-    });
-
-
-    if (
-        creators.includes(currentValue)
-    ) {
-
-        creatorFilter.value =
-            currentValue;
-
-    }
-    else {
-
-        creatorFilter.value =
-            "ALL";
-
-    }
-
-}
-
-
-/* ============================================================
-   INITIALIZE FILTERS
-============================================================ */
-
-function initializeFilters() {
-
-    const creatorFilter =
-        document.getElementById(
-            "creatorFilter"
-        );
-
-
-    const expenseTypeFilter =
-        document.getElementById(
-            "expenseTypeFilter"
-        );
-
-
-    const rowsSelect =
-        document.getElementById(
-            "rowsPerPage"
-        );
-
-
-    const clearButton =
-        document.getElementById(
-            "clearFilterBtn"
-        );
-
-
-    if (creatorFilter) {
-
-        creatorFilter.addEventListener(
-            "change",
-            function () {
-
-                selectedCreator =
-                    this.value;
-
-                currentPage =
-                    1;
-
-                applyFilters();
-
-                renderExpenseTable();
-
-                renderPagination();
-
-            }
-        );
-
-    }
-
-
-    if (expenseTypeFilter) {
-
-        expenseTypeFilter.addEventListener(
-            "change",
-            function () {
-
-                selectedExpenseType =
-                    this.value;
-
-                currentPage =
-                    1;
-
-                applyFilters();
-
-                renderExpenseTable();
-
-                renderPagination();
-
-            }
-        );
-
-    }
-
-
-    if (rowsSelect) {
-
-        rowsSelect.addEventListener(
-            "change",
-            function () {
-
-                rowsPerPage =
-                    Number(this.value);
-
-                currentPage =
-                    1;
-
-                renderExpenseTable();
-
-                renderPagination();
-
-            }
-        );
-
-    }
-
-
-    if (clearButton) {
-
-        clearButton.addEventListener(
-            "click",
-            clearFilters
-        );
-
-    }
-
-
-    const printButton =
-        document.getElementById(
-            "printBtn"
-        );
-
-
-    if (printButton) {
-
-        printButton.addEventListener(
-            "click",
-            printExpenses
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   APPLY FILTERS
-============================================================ */
-
-function applyFilters() {
-
-    filteredExpenses =
-        allExpenses.filter(
-            function (expense) {
-
-
-                const creatorMatch =
-                    selectedCreator === "ALL"
-                    ||
-                    expense.creator ===
-                    selectedCreator;
-
-
-                const typeMatch =
-                    selectedExpenseType === "ALL"
-                    ||
-                    expense.expense_type ===
-                    selectedExpenseType;
-
-
-                return (
-                    creatorMatch &&
-                    typeMatch
-                );
-
-            }
-        );
-
-
-    updateSummary();
-
-}
-
-
-/* ============================================================
-   CLEAR FILTERS
-============================================================ */
-
-function clearFilters() {
-
-    selectedCreator =
-        "ALL";
-
-
-    selectedExpenseType =
-        "ALL";
-
-
-    currentPage =
-        1;
-
-
-    const creatorFilter =
-        document.getElementById(
-            "creatorFilter"
-        );
-
-
-    const expenseTypeFilter =
-        document.getElementById(
-            "expenseTypeFilter"
-        );
-
-
-    if (creatorFilter) {
-        creatorFilter.value =
-            "ALL";
-    }
-
-
-    if (expenseTypeFilter) {
-        expenseTypeFilter.value =
-            "ALL";
-    }
-
-
-    applyFilters();
-
-    renderExpenseTable();
-
-    renderPagination();
-
-}
-
-
-/* ============================================================
-   UPDATE SUMMARY
-============================================================ */
-
-function updateSummary() {
+function updateSummaryCards() {
 
     const totalEntries =
         document.getElementById(
@@ -1586,48 +1359,29 @@ function updateSummary() {
         );
 
 
-    const total =
-        filteredExpenses.reduce(
-            function (sum, expense) {
+    if (totalEntries) {
 
-                return (
-                    sum +
-                    Number(expense.amount || 0)
-                );
+        totalEntries.textContent =
+            allExpenses.length;
 
-            },
-            0
-        );
+    }
 
 
     const today =
-        new Date();
-
-
-    const todayString =
-        today.toISOString()
-            .split("T")[0];
+        getTodayString();
 
 
     const todayCount =
-        filteredExpenses.filter(
+        allExpenses.filter(
             function (expense) {
 
                 return (
                     expense.expense_date ===
-                    todayString
+                    today
                 );
 
             }
         ).length;
-
-
-    if (totalEntries) {
-
-        totalEntries.textContent =
-            filteredExpenses.length;
-
-    }
 
 
     if (todayEntries) {
@@ -1638,41 +1392,335 @@ function updateSummary() {
     }
 
 
+    const amount =
+        allExpenses.reduce(
+            function (sum, expense) {
+
+                return (
+                    sum +
+                    Number(
+                        expense.amount || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
     if (totalAmount) {
 
         totalAmount.textContent =
-            formatCurrency(total);
+            formatCurrency(amount);
 
     }
+}
 
 
-    const printTotalEntries =
+/* ============================================================
+   CREATOR FILTER OPTIONS
+============================================================ */
+
+function initializeCreatorFilterOptions() {
+
+    const select =
         document.getElementById(
-            "printTotalEntries"
+            "creatorFilter"
         );
 
 
-    const printTotalAmount =
-        document.getElementById(
-            "printTotalAmount"
+    if (!select) {
+        return;
+    }
+
+
+    const currentValue =
+        select.value ||
+        "ALL";
+
+
+    const creators =
+        [
+            ...new Set(
+                allExpenses
+                    .map(
+                        expense =>
+                            String(
+                                expense.creator || ""
+                            ).trim()
+                    )
+                    .filter(Boolean)
+            )
+        ]
+        .sort(
+            function (a, b) {
+
+                return a.localeCompare(
+                    b
+                );
+
+            }
         );
 
 
-    if (printTotalEntries) {
+    select.innerHTML =
+        `<option value="ALL">
+            All Creators
+         </option>`;
 
-        printTotalEntries.textContent =
-            filteredExpenses.length;
+
+    creators.forEach(
+        function (creator) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                creator;
+
+
+            option.textContent =
+                creator;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if (
+        [...select.options]
+            .some(
+                option =>
+                    option.value ===
+                    currentValue
+            )
+    ) {
+
+        select.value =
+            currentValue;
+
+    }
+
+}
+
+
+/* ============================================================
+   FILTER INITIALIZATION
+============================================================ */
+
+function initializeExpenseFilters() {
+
+    const creatorFilter =
+        document.getElementById(
+            "creatorFilter"
+        );
+
+
+    const typeFilter =
+        document.getElementById(
+            "expenseTypeFilter"
+        );
+
+
+    const clearButton =
+        document.getElementById(
+            "clearFilterBtn"
+        );
+
+
+    if (creatorFilter) {
+
+        creatorFilter.addEventListener(
+            "change",
+            function () {
+
+                selectedCreator =
+                    creatorFilter.value;
+
+                currentPage = 1;
+
+                applyExpenseFilters();
+
+            }
+        );
 
     }
 
 
-    if (printTotalAmount) {
+    if (typeFilter) {
 
-        printTotalAmount.textContent =
-            formatCurrency(total);
+        typeFilter.addEventListener(
+            "change",
+            function () {
+
+                selectedExpenseType =
+                    typeFilter.value;
+
+                currentPage = 1;
+
+                applyExpenseFilters();
+
+            }
+        );
 
     }
 
+
+    if (clearButton) {
+
+        clearButton.addEventListener(
+            "click",
+            function () {
+
+                selectedCreator =
+                    "ALL";
+
+                selectedExpenseType =
+                    "ALL";
+
+                currentPage = 1;
+
+
+                if (creatorFilter) {
+                    creatorFilter.value =
+                        "ALL";
+                }
+
+
+                if (typeFilter) {
+                    typeFilter.value =
+                        "ALL";
+                }
+
+
+                applyExpenseFilters();
+
+            }
+        );
+
+    }
+}
+
+
+/* ============================================================
+   ROWS PER PAGE
+============================================================ */
+
+function initializeRowsPerPage() {
+
+    const select =
+        document.getElementById(
+            "rowsPerPage"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    select.value =
+        String(rowsPerPage);
+
+
+    select.addEventListener(
+        "change",
+        function () {
+
+            rowsPerPage =
+                Number(
+                    select.value
+                );
+
+
+            currentPage = 1;
+
+            renderExpenseTable();
+
+        }
+    );
+}
+
+
+/* ============================================================
+   APPLY FILTERS
+============================================================ */
+
+function applyExpenseFilters() {
+
+    filteredExpenses =
+        allExpenses.filter(
+            function (expense) {
+
+                const creatorMatches =
+                    selectedCreator ===
+                    "ALL" ||
+                    String(
+                        expense.creator || ""
+                    ).trim() ===
+                    selectedCreator;
+
+
+                const typeMatches =
+                    selectedExpenseType ===
+                    "ALL" ||
+                    String(
+                        expense.expense_type || ""
+                    ).trim() ===
+                    selectedExpenseType;
+
+
+                return (
+                    creatorMatches &&
+                    typeMatches
+                );
+
+            }
+        );
+
+
+    currentPage = Math.min(
+        currentPage,
+        getTotalPages()
+    );
+
+
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+
+
+    renderExpenseTable();
+
+}
+
+
+/* ============================================================
+   GET TOTAL PAGES
+============================================================ */
+
+function getTotalPages() {
+
+    if (
+        filteredExpenses.length ===
+        0
+    ) {
+
+        return 1;
+    }
+
+
+    return Math.ceil(
+        filteredExpenses.length /
+        rowsPerPage
+    );
 }
 
 
@@ -1694,24 +1742,18 @@ function renderExpenseTable() {
         );
 
 
-    const grandTotalElement =
-        document.getElementById(
-            "tableGrandTotal"
-        );
-
-
     if (!tbody) {
         return;
     }
 
 
-    tbody.innerHTML =
-        "";
-
-
     if (
-        filteredExpenses.length === 0
+        filteredExpenses.length ===
+        0
     ) {
+
+        tbody.innerHTML = "";
+
 
         if (emptyMessage) {
 
@@ -1721,13 +1763,13 @@ function renderExpenseTable() {
         }
 
 
-        if (grandTotalElement) {
+        updateTableTotals(
+            [],
+            filteredExpenses
+        );
 
-            grandTotalElement.textContent =
-                "₹0.00";
 
-        }
-
+        renderPagination();
 
         return;
 
@@ -1742,38 +1784,10 @@ function renderExpenseTable() {
     }
 
 
-    /* --------------------------------------------------------
-       GRAND TOTAL
-    -------------------------------------------------------- */
-
-    const grandTotal =
-        filteredExpenses.reduce(
-            function (sum, expense) {
-
-                return (
-                    sum +
-                    Number(expense.amount || 0)
-                );
-
-            },
-            0
-        );
-
-
-    if (grandTotalElement) {
-
-        grandTotalElement.textContent =
-            formatCurrency(grandTotal);
-
-    }
-
-
-    /* --------------------------------------------------------
-       PAGINATION
-    -------------------------------------------------------- */
-
     const startIndex =
-        (currentPage - 1) *
+        (
+            currentPage - 1
+        ) *
         rowsPerPage;
 
 
@@ -1789,145 +1803,208 @@ function renderExpenseTable() {
         );
 
 
-    pageExpenses.forEach(
-        function (expense, index) {
+    tbody.innerHTML =
+        pageExpenses
+            .map(
+                function (
+                    expense,
+                    index
+                ) {
+
+                    const serial =
+                        startIndex +
+                        index +
+                        1;
 
 
-            const row =
-                document.createElement("tr");
+                    const date =
+                        formatDate(
+                            expense.expense_date
+                        );
 
 
-            const serial =
-                startIndex +
-                index +
-                1;
+                    const time =
+                        formatTime(
+                            expense.expense_time
+                        );
 
 
-            const date =
-                formatDate(
-                    expense.expense_date
-                );
+                    const amount =
+                        formatCurrency(
+                            Number(
+                                expense.amount || 0
+                            )
+                        );
 
 
-            const time =
-                expense.expense_time
-                    ? expense.expense_time.substring(
-                        0,
-                        5
-                    )
-                    : "-";
+                    return `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${serial}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    expense.creator
+                                )}
+                            </td>
+
+                            <td>
+                                ${date}
+                            </td>
+
+                            <td>
+                                ${time}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    expense.expense_type
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    expense.category
+                                )}
+                            </td>
+
+                            <td class="description-cell">
+                                ${escapeHTML(
+                                    expense.comment
+                                )}
+                            </td>
+
+                            <td class="amount-cell">
+                                ${amount}
+                            </td>
+
+                            <td class="action-cell">
+
+                                <div class="d-flex gap-1 justify-content-center">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="openEditModal(${expense.id})"
+                                        title="Edit">
+
+                                        <i class="fa-solid fa-pen"></i>
+
+                                    </button>
 
 
-            row.innerHTML = `
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="openDeleteModal(${expense.id})"
+                                        title="Delete">
 
-                <td>
-                    ${serial}
-                </td>
+                                        <i class="fa-solid fa-trash"></i>
 
-                <td>
-                    ${escapeHtml(
-                        expense.creator || "-"
-                    )}
-                </td>
+                                    </button>
 
-                <td>
-                    ${date}
-                </td>
+                                </div>
 
-                <td>
-                    ${time}
-                </td>
+                            </td>
 
-                <td>
-                    ${escapeHtml(
-                        expense.expense_type || "-"
-                    )}
-                </td>
+                        </tr>
+                    `;
 
-                <td>
-                    ${escapeHtml(
-                        expense.category || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        expense.comment || "-"
-                    )}
-                </td>
-
-                <td>
-                    <strong>
-                        ${formatCurrency(
-                            expense.amount
-                        )}
-                    </strong>
-                </td>
-
-                <td class="action-cell no-print">
-
-                    <div class="d-flex gap-1">
-
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-primary"
-                            onclick="openEditModal(${expense.id})"
-                            title="Edit">
-
-                            <i class="fa-solid fa-pen"></i>
-
-                        </button>
+                }
+            )
+            .join("");
 
 
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-danger"
-                            onclick="openDeleteModal(${expense.id})"
-                            title="Delete">
-
-                            <i class="fa-solid fa-trash"></i>
-
-                        </button>
-
-                    </div>
-
-                </td>
-
-            `;
-
-
-            tbody.appendChild(row);
-
-        }
+    updateTableTotals(
+        pageExpenses,
+        filteredExpenses
     );
 
+
+    renderPagination();
+}
+
+
+/* ============================================================
+   TABLE TOTALS
+============================================================ */
+
+function updateTableTotals(
+    pageExpenses,
+    allFilteredExpenses
+) {
+
+    const grandTotalElement =
+        document.getElementById(
+            "tableGrandTotal"
+        );
+
+
+    const pageTotalElement =
+        document.getElementById(
+            "pageGrandTotal"
+        );
+
+
+    const grandTotal =
+        allFilteredExpenses.reduce(
+            function (sum, expense) {
+
+                return (
+                    sum +
+                    Number(
+                        expense.amount || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const pageTotal =
+        pageExpenses.reduce(
+            function (sum, expense) {
+
+                return (
+                    sum +
+                    Number(
+                        expense.amount || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    if (grandTotalElement) {
+
+        grandTotalElement.textContent =
+            formatCurrency(
+                grandTotal
+            );
+
+    }
+
+
+    if (pageTotalElement) {
+
+        pageTotalElement.textContent =
+            formatCurrency(
+                pageTotal
+            );
+
+    }
 }
 
 
 /* ============================================================
    PAGINATION
-============================================================ */
-
-function initializePagination() {
-
-    const container =
-        document.getElementById(
-            "expensePaginationContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    renderPagination();
-
-}
-
-
-/* ============================================================
-   RENDER PAGINATION
 ============================================================ */
 
 function renderPagination() {
@@ -1943,61 +2020,107 @@ function renderPagination() {
     }
 
 
-    container.innerHTML =
-        "";
+    container.innerHTML = "";
 
 
     const totalPages =
-        Math.ceil(
-            filteredExpenses.length /
-            rowsPerPage
-        );
+        getTotalPages();
 
 
-    if (totalPages <= 1) {
+    if (
+        filteredExpenses.length ===
+        0
+    ) {
+
         return;
     }
 
 
-    const wrapper =
-        document.createElement("div");
+    const start =
+        (
+            currentPage - 1
+        ) *
+        rowsPerPage +
+        1;
 
 
-    wrapper.className =
-        "d-flex justify-content-center align-items-center gap-2 mt-4";
+    const end =
+        Math.min(
+            currentPage *
+            rowsPerPage,
+            filteredExpenses.length
+        );
 
 
-    /* --------------------------------------------------------
+    const info =
+        document.createElement(
+            "div"
+        );
+
+
+    info.className =
+        "pagination-info";
+
+
+    info.textContent =
+        `Showing ${start}-${end} of ${filteredExpenses.length} expenses`;
+
+
+    container.appendChild(
+        info
+    );
+
+
+    const buttonsWrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    buttonsWrapper.className =
+        "d-flex flex-wrap justify-content-center gap-1";
+
+
+    /* ========================================================
        PREVIOUS
-    -------------------------------------------------------- */
+    ======================================================== */
 
-    const previousButton =
-        document.createElement("button");
+    const previous =
+        document.createElement(
+            "button"
+        );
 
 
-    previousButton.className =
+    previous.type =
+        "button";
+
+
+    previous.className =
         "btn btn-outline-primary";
 
 
-    previousButton.innerHTML =
+    previous.innerHTML =
         `<i class="fa-solid fa-chevron-left"></i>`;
 
 
-    previousButton.disabled =
+    previous.disabled =
         currentPage === 1;
 
 
-    previousButton.addEventListener(
+    previous.addEventListener(
         "click",
         function () {
 
-            if (currentPage > 1) {
+            if (
+                currentPage >
+                1
+            ) {
 
                 currentPage--;
 
                 renderExpenseTable();
 
-                renderPagination();
+                scrollTableToTop();
 
             }
 
@@ -2005,23 +2128,69 @@ function renderPagination() {
     );
 
 
-    wrapper.appendChild(
-        previousButton
+    buttonsWrapper.appendChild(
+        previous
     );
 
 
-    /* --------------------------------------------------------
-       PAGE NUMBERS
-    -------------------------------------------------------- */
+    /* ========================================================
+       PAGE BUTTONS
+    ======================================================== */
+
+    const maxButtons = 7;
+
+
+    let startPage =
+        Math.max(
+            1,
+            currentPage -
+            Math.floor(
+                maxButtons / 2
+            )
+        );
+
+
+    let endPage =
+        Math.min(
+            totalPages,
+            startPage +
+            maxButtons -
+            1
+        );
+
+
+    if (
+        endPage -
+        startPage +
+        1 <
+        maxButtons
+    ) {
+
+        startPage =
+            Math.max(
+                1,
+                endPage -
+                maxButtons +
+                1
+            );
+
+    }
+
 
     for (
-        let page = 1;
-        page <= totalPages;
+        let page = startPage;
+        page <= endPage;
         page++
     ) {
 
         const button =
-            document.createElement("button");
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
 
 
         button.className =
@@ -2043,45 +2212,47 @@ function renderPagination() {
 
                 renderExpenseTable();
 
-                renderPagination();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
+                scrollTableToTop();
 
             }
         );
 
 
-        wrapper.appendChild(
+        buttonsWrapper.appendChild(
             button
         );
 
     }
 
 
-    /* --------------------------------------------------------
+    /* ========================================================
        NEXT
-    -------------------------------------------------------- */
+    ======================================================== */
 
-    const nextButton =
-        document.createElement("button");
+    const next =
+        document.createElement(
+            "button"
+        );
 
 
-    nextButton.className =
+    next.type =
+        "button";
+
+
+    next.className =
         "btn btn-outline-primary";
 
 
-    nextButton.innerHTML =
+    next.innerHTML =
         `<i class="fa-solid fa-chevron-right"></i>`;
 
 
-    nextButton.disabled =
-        currentPage === totalPages;
+    next.disabled =
+        currentPage ===
+        totalPages;
 
 
-    nextButton.addEventListener(
+    next.addEventListener(
         "click",
         function () {
 
@@ -2094,7 +2265,7 @@ function renderPagination() {
 
                 renderExpenseTable();
 
-                renderPagination();
+                scrollTableToTop();
 
             }
 
@@ -2102,20 +2273,51 @@ function renderPagination() {
     );
 
 
-    wrapper.appendChild(
-        nextButton
+    buttonsWrapper.appendChild(
+        next
     );
 
 
     container.appendChild(
-        wrapper
+        buttonsWrapper
     );
-
 }
 
 
 /* ============================================================
-   OPEN EDIT MODAL
+   SCROLL TABLE TO TOP
+============================================================ */
+
+function scrollTableToTop() {
+
+    const table =
+        document.getElementById(
+            "expenseTable"
+        );
+
+
+    if (!table) {
+        return;
+    }
+
+
+    const top =
+        table.getBoundingClientRect().top +
+        window.scrollY -
+        90;
+
+
+    window.scrollTo(
+        {
+            top: top,
+            behavior: "smooth"
+        }
+    );
+}
+
+
+/* ============================================================
+   EDIT EXPENSE
 ============================================================ */
 
 function openEditModal(id) {
@@ -2140,142 +2342,81 @@ function openEditModal(id) {
         );
 
         return;
-
     }
 
 
     editingExpenseId =
-        id;
+        expense.id;
 
 
-    const serialInput =
-        document.getElementById(
-            "editSerialNo"
-        );
+    const serial =
+        filteredExpenses.findIndex(
+            function (item) {
+
+                return (
+                    Number(item.id) ===
+                    Number(id)
+                );
+
+            }
+        ) + 1;
 
 
-    const creatorInput =
-        document.getElementById(
-            "editCreator"
-        );
+    document.getElementById(
+        "editSerialNo"
+    ).value =
+        serial > 0
+            ? serial
+            : "";
 
 
-    const dateInput =
-        document.getElementById(
-            "editDate"
-        );
+    document.getElementById(
+        "editCreator"
+    ).value =
+        expense.creator || "";
 
 
-    const timeInput =
-        document.getElementById(
-            "editTime"
-        );
+    document.getElementById(
+        "editDate"
+    ).value =
+        expense.expense_date || "";
 
 
-    const typeInput =
-        document.getElementById(
-            "editExpenseType"
-        );
+    document.getElementById(
+        "editTime"
+    ).value =
+        expense.expense_time
+            ? String(
+                expense.expense_time
+              ).substring(
+                0,
+                5
+              )
+            : "";
 
 
-    const categoryInput =
-        document.getElementById(
-            "editCategory"
-        );
+    document.getElementById(
+        "editExpenseType"
+    ).value =
+        expense.expense_type || "";
 
 
-    const commentInput =
-        document.getElementById(
-            "editComment"
-        );
+    document.getElementById(
+        "editCategory"
+    ).value =
+        expense.category || "";
 
 
-    const amountInput =
-        document.getElementById(
-            "editAmount"
-        );
+    document.getElementById(
+        "editComment"
+    ).value =
+        expense.comment || "";
 
 
-    if (serialInput) {
-
-        const serial =
-            allExpenses.findIndex(
-                function (item) {
-
-                    return (
-                        Number(item.id) ===
-                        Number(id)
-                    );
-
-                }
-            ) + 1;
-
-
-        serialInput.value =
-            serial;
-
-    }
-
-
-    if (creatorInput) {
-
-        creatorInput.value =
-            expense.creator || "";
-
-    }
-
-
-    if (dateInput) {
-
-        dateInput.value =
-            expense.expense_date || "";
-
-    }
-
-
-    if (timeInput) {
-
-        timeInput.value =
-            expense.expense_time
-                ? expense.expense_time.substring(
-                    0,
-                    5
-                )
-                : "";
-
-    }
-
-
-    if (typeInput) {
-
-        typeInput.value =
-            expense.expense_type || "";
-
-    }
-
-
-    if (categoryInput) {
-
-        categoryInput.value =
-            expense.category || "";
-
-    }
-
-
-    if (commentInput) {
-
-        commentInput.value =
-            expense.comment || "";
-
-    }
-
-
-    if (amountInput) {
-
-        amountInput.value =
-            expense.amount || "";
-
-    }
+    document.getElementById(
+        "editAmount"
+    ).value =
+        expense.amount || "";
 
 
     const modalElement =
@@ -2284,18 +2425,14 @@ function openEditModal(id) {
         );
 
 
-    if (modalElement) {
-
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
+    const modal =
+        bootstrap.Modal
+            .getOrCreateInstance(
                 modalElement
             );
 
 
-        modal.show();
-
-    }
-
+    modal.show();
 }
 
 
@@ -2305,122 +2442,122 @@ function openEditModal(id) {
 
 async function updateExpense() {
 
-    if (!editingExpenseId) {
+    if (
+        !editingExpenseId
+    ) {
 
         showError(
             "No expense selected."
         );
 
         return;
-
     }
 
 
     const creator =
         document.getElementById(
             "editCreator"
-        ).value.trim();
+        )?.value.trim();
 
 
     const expenseDate =
         document.getElementById(
             "editDate"
-        ).value;
+        )?.value;
 
 
     const expenseTime =
         document.getElementById(
             "editTime"
-        ).value;
+        )?.value;
 
 
     const expenseType =
         document.getElementById(
             "editExpenseType"
-        ).value;
+        )?.value;
 
 
     const category =
         document.getElementById(
             "editCategory"
-        ).value;
+        )?.value;
 
 
     const comment =
         document.getElementById(
             "editComment"
-        ).value.trim();
+        )?.value.trim();
 
 
     const amount =
-        document.getElementById(
-            "editAmount"
-        ).value;
+        Number(
+            document.getElementById(
+                "editAmount"
+            )?.value
+        );
 
 
     if (!creator) {
 
         showError(
-            "Creator is required."
+            "Please enter the creator."
         );
 
         return;
-
     }
 
 
     if (!expenseDate) {
 
         showError(
-            "Date is required."
+            "Please select the date."
         );
 
         return;
-
     }
 
 
     if (!expenseType) {
 
         showError(
-            "Expense type is required."
+            "Please select the expense type."
         );
 
         return;
-
     }
 
 
     if (!category) {
 
         showError(
-            "Category is required."
+            "Please select the category."
         );
 
         return;
-
     }
 
 
     if (!comment) {
 
         showError(
-            "Description is required."
+            "Please enter the description."
         );
 
         return;
-
     }
 
 
-    if (!amount || Number(amount) <= 0) {
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
 
         showError(
             "Please enter a valid amount."
         );
 
         return;
-
     }
 
 
@@ -2428,49 +2565,42 @@ async function updateExpense() {
 
         const {
             error
-        } = await supabaseClient
+        } =
+            await supabaseClient
+                .from("expenses")
+                .update(
+                    {
+                        creator:
+                            creator,
 
-            .from("expenses")
+                        expense_date:
+                            expenseDate,
 
-            .update({
+                        expense_time:
+                            expenseTime ||
+                            null,
 
-                creator: creator,
+                        expense_type:
+                            expenseType,
 
-                expense_date: expenseDate,
+                        category:
+                            category,
 
-                expense_time:
-                    expenseTime || null,
+                        comment:
+                            comment,
 
-                expense_type: expenseType,
-
-                category: category,
-
-                comment: comment,
-
-                amount: Number(amount)
-
-            })
-
-            .eq(
-                "id",
-                editingExpenseId
-            );
+                        amount:
+                            amount
+                    }
+                )
+                .eq(
+                    "id",
+                    editingExpenseId
+                );
 
 
         if (error) {
-
-            console.error(
-                "Update error:",
-                error
-            );
-
-            showError(
-                error.message ||
-                "Unable to update expense."
-            );
-
-            return;
-
+            throw error;
         }
 
 
@@ -2480,18 +2610,15 @@ async function updateExpense() {
             );
 
 
-        if (modalElement) {
-
-            const modal =
-                bootstrap.Modal.getInstance(
+        const modal =
+            bootstrap.Modal
+                .getInstance(
                     modalElement
                 );
 
 
-            if (modal) {
-                modal.hide();
-            }
-
+        if (modal) {
+            modal.hide();
         }
 
 
@@ -2507,28 +2634,31 @@ async function updateExpense() {
         await loadExpenseTable();
 
     }
+
     catch (error) {
 
         console.error(
+            "Update expense error:",
             error
         );
 
+
         showError(
-            "Unexpected error while updating."
+            error.message ||
+            "Unable to update expense."
         );
 
     }
-
 }
 
 
 /* ============================================================
-   OPEN DELETE MODAL
+   DELETE MODAL
 ============================================================ */
 
 function openDeleteModal(id) {
 
-    deleteExpenseId =
+    deletingExpenseId =
         id;
 
 
@@ -2538,15 +2668,11 @@ function openDeleteModal(id) {
         );
 
 
-    if (!modalElement) {
-        return;
-    }
-
-
     const modal =
-        bootstrap.Modal.getOrCreateInstance(
-            modalElement
-        );
+        bootstrap.Modal
+            .getOrCreateInstance(
+                modalElement
+            );
 
 
     modal.show();
@@ -2558,42 +2684,48 @@ function openDeleteModal(id) {
         );
 
 
-    if (confirmButton) {
-
-        confirmButton.onclick =
-            confirmDeleteExpense;
-
+    if (!confirmButton) {
+        return;
     }
 
+
+    confirmButton.onclick =
+        confirmDeleteExpense;
 }
 
 
 /* ============================================================
-   CONFIRM DELETE
+   DELETE EXPENSE
 ============================================================ */
 
 async function confirmDeleteExpense() {
 
-    if (!deleteExpenseId) {
+    if (
+        !deletingExpenseId
+    ) {
 
         return;
-
     }
 
 
-    const button =
+    const confirmButton =
         document.getElementById(
             "confirmDelete"
         );
 
 
-    if (button) {
+    const originalHTML =
+        confirmButton
+            ? confirmButton.innerHTML
+            : "";
 
-        button.disabled =
-            true;
 
-        button.innerHTML =
-            `<span class="spinner-border spinner-border-sm me-1"></span>
+    if (confirmButton) {
+
+        confirmButton.disabled = true;
+
+        confirmButton.innerHTML =
+            `<span class="spinner-border spinner-border-sm me-2"></span>
              Deleting...`;
 
     }
@@ -2603,32 +2735,18 @@ async function confirmDeleteExpense() {
 
         const {
             error
-        } = await supabaseClient
-
-            .from("expenses")
-
-            .delete()
-
-            .eq(
-                "id",
-                deleteExpenseId
-            );
+        } =
+            await supabaseClient
+                .from("expenses")
+                .delete()
+                .eq(
+                    "id",
+                    deletingExpenseId
+                );
 
 
         if (error) {
-
-            console.error(
-                "Delete error:",
-                error
-            );
-
-            showError(
-                error.message ||
-                "Unable to delete expense."
-            );
-
-            return;
-
+            throw error;
         }
 
 
@@ -2638,23 +2756,16 @@ async function confirmDeleteExpense() {
             );
 
 
-        if (modalElement) {
-
-            const modal =
-                bootstrap.Modal.getInstance(
+        const modal =
+            bootstrap.Modal
+                .getInstance(
                     modalElement
                 );
 
 
-            if (modal) {
-                modal.hide();
-            }
-
+        if (modal) {
+            modal.hide();
         }
-
-
-        deleteExpenseId =
-            null;
 
 
         showSuccess(
@@ -2662,388 +2773,655 @@ async function confirmDeleteExpense() {
         );
 
 
+        deletingExpenseId =
+            null;
+
+
         await loadExpenseTable();
 
     }
+
     catch (error) {
 
         console.error(
+            "Delete expense error:",
             error
         );
+
 
         showError(
-            "Unexpected error while deleting."
+            error.message ||
+            "Unable to delete expense."
         );
 
     }
+
     finally {
 
-        if (button) {
+        if (confirmButton) {
 
-            button.disabled =
-                false;
+            confirmButton.disabled = false;
 
-            button.innerHTML =
-                `<i class="fa-solid fa-trash"></i>
-                 Delete`;
+            confirmButton.innerHTML =
+                originalHTML;
 
         }
 
     }
-
 }
 
 
 /* ============================================================
-   PRINT EXPENSES
+   DOWNLOAD PDF
 ============================================================ */
 
-/* ============================================================
-   DAILY EXPENSE TRACKER
-   MOBILE + DESKTOP PRINT FUNCTION
-============================================================ */
+async function downloadExpensePDF() {
 
-function printExpenses() {
+    if (
+        !filteredExpenses ||
+        filteredExpenses.length === 0
+    ) {
 
-    console.log("Print button clicked");
-
-    /*
-       ---------------------------------------------------------
-       1. CHECK FOR ANDROID WEBVIEW BRIDGE
-       ---------------------------------------------------------
-
-       If your mobile-app builder provides a JavaScript bridge
-       called AndroidPrint, the native Android application can
-       handle printing.
-
-       Example native method:
-
-       AndroidPrint.printPage()
-
-       If your app builder uses a different bridge name,
-       that name must be used here.
-    */
-
-    try {
-
-        if (
-            typeof AndroidPrint !== "undefined" &&
-            typeof AndroidPrint.printPage === "function"
-        ) {
-
-            console.log("Android native print bridge detected.");
-
-            AndroidPrint.printPage();
-
-            return;
-        }
-
-    } catch (error) {
-
-        console.log(
-            "Android print bridge unavailable:",
-            error
+        showError(
+            "There are no expenses available to download."
         );
 
-    }
-
-
-    /*
-       ---------------------------------------------------------
-       2. CHECK FOR GENERIC WEBVIEW BRIDGE
-       ---------------------------------------------------------
-    */
-
-    try {
-
-        if (
-            typeof Android !== "undefined" &&
-            typeof Android.printPage === "function"
-        ) {
-
-            console.log("Generic Android print bridge detected.");
-
-            Android.printPage();
-
-            return;
-        }
-
-    } catch (error) {
-
-        console.log(
-            "Generic Android bridge unavailable:",
-            error
-        );
-
-    }
-
-
-    /*
-       ---------------------------------------------------------
-       3. NORMAL BROWSER
-       ---------------------------------------------------------
-
-       Chrome / Edge / Firefox / desktop browser etc.
-    */
-
-    try {
-
-        if (typeof window.print === "function") {
-
-            console.log("Opening browser print dialog...");
-
-            window.print();
-
-            return;
-        }
-
-    } catch (error) {
-
-        console.log(
-            "window.print() failed:",
-            error
-        );
-
-    }
-
-
-    /*
-       ---------------------------------------------------------
-       4. FINAL FALLBACK
-       ---------------------------------------------------------
-    */
-
-    showPrintInstructions();
-
-}
-
-
-/* ============================================================
-   PRINT INSTRUCTIONS
-============================================================ */
-
-function showPrintInstructions() {
-
-    alert(
-        "Printing is not supported directly by this mobile app.\n\n" +
-        "Please open the Expense Tracker website in Chrome " +
-        "and use the Print option there."
-    );
-
-}
-
-
-/* ============================================================
-   OPTIONAL PRINT BUTTON INITIALIZATION
-============================================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const printBtn =
-            document.getElementById("printBtn");
-
-        if (!printBtn) {
-
-            return;
-
-        }
-
-        printBtn.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-
-                printExpenses();
-
-            }
-        );
-
-    }
-);
-
-
-
-/* ============================================================
-   PREPARE FULL TABLE FOR PRINT
-============================================================ */
-
-function prepareFullPrintTable() {
-
-    const tbody =
-        document.getElementById(
-            "expenseTableBody"
-        );
-
-
-    if (!tbody) {
         return;
     }
 
 
-    /* --------------------------------------------------------
-       SAVE CURRENT HTML
-       So we can restore pagination after printing.
-    -------------------------------------------------------- */
+    if (
+        typeof window.jspdf ===
+        "undefined"
+    ) {
 
-    tbody.dataset.originalHtml =
-        tbody.innerHTML;
+        showError(
+            "PDF library is not loaded. Please check your internet connection and try again."
+        );
 
-
-    tbody.innerHTML =
-        "";
-
-
-    filteredExpenses.forEach(
-        function (expense, index) {
+        return;
+    }
 
 
-            const row =
-                document.createElement("tr");
+    const downloadButton =
+        document.getElementById(
+            "downloadPdfBtn"
+        );
 
 
-            row.innerHTML = `
-
-                <td>
-                    ${index + 1}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        expense.creator || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${formatDate(
-                        expense.expense_date
-                    )}
-                </td>
-
-                <td>
-                    ${
-                        expense.expense_time
-                            ? expense.expense_time.substring(
-                                0,
-                                5
-                            )
-                            : "-"
-                    }
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        expense.expense_type || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        expense.category || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        expense.comment || "-"
-                    )}
-                </td>
-
-                <td>
-                    <strong>
-                        ${formatCurrency(
-                            expense.amount
-                        )}
-                    </strong>
-                </td>
-
-                <td class="action-cell no-print">
-
-                </td>
-
-            `;
+    const originalHTML =
+        downloadButton
+            ? downloadButton.innerHTML
+            : "";
 
 
-            tbody.appendChild(row);
+    if (downloadButton) {
 
-        }
-    );
+        downloadButton.disabled =
+            true;
 
-}
-
-
-/* ============================================================
-   RESTORE TABLE AFTER PRINT
-============================================================ */
-
-window.addEventListener(
-    "afterprint",
-    function () {
-
-        renderExpenseTable();
-
-        renderPagination();
+        downloadButton.innerHTML =
+            `<span class="spinner-border spinner-border-sm me-2"></span>
+             Creating PDF...`;
 
     }
-);
 
 
-/* ============================================================
-   CURRENCY FORMAT
-============================================================ */
+    try {
 
-function formatCurrency(amount) {
+        const {
+            jsPDF
+        } =
+            window.jspdf;
 
-    return "₹" +
-        Number(amount || 0)
-            .toLocaleString(
-                "en-IN",
+
+        /*
+           A4 landscape is used because
+           there are many expense columns.
+        */
+
+        const doc =
+            new jsPDF(
                 {
-                    minimumFractionDigits: 2,
+                    orientation:
+                        "landscape",
 
-                    maximumFractionDigits: 2
+                    unit:
+                        "mm",
+
+                    format:
+                        "a4"
                 }
             );
 
+
+        /* ====================================================
+           TITLE
+        ==================================================== */
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            18
+        );
+
+
+        doc.text(
+            "DAILY EXPENSE REPORT",
+            148,
+            15,
+            {
+                align: "center"
+            }
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.text(
+            "Daily Expense Tracker",
+            148,
+            21,
+            {
+                align: "center"
+            }
+        );
+
+
+        /* ====================================================
+           FILTER INFORMATION
+        ==================================================== */
+
+        let filterText =
+            "Filters: ";
+
+
+        if (
+            selectedCreator ===
+            "ALL"
+        ) {
+
+            filterText +=
+                "All Creators";
+
+        }
+
+        else {
+
+            filterText +=
+                `Creator: ${selectedCreator}`;
+
+        }
+
+
+        filterText +=
+            " | ";
+
+
+        if (
+            selectedExpenseType ===
+            "ALL"
+        ) {
+
+            filterText +=
+                "All Expense Types";
+
+        }
+
+        else {
+
+            filterText +=
+                `Expense Type: ${selectedExpenseType}`;
+
+        }
+
+
+        doc.setFontSize(
+            8
+        );
+
+
+        doc.text(
+            filterText,
+            148,
+            27,
+            {
+                align: "center"
+            }
+        );
+
+
+        /* ====================================================
+           GENERATED DATE
+        ==================================================== */
+
+        const generatedDate =
+            new Date()
+                .toLocaleString(
+                    "en-IN"
+                );
+
+
+        doc.text(
+            `Generated: ${generatedDate}`,
+            148,
+            32,
+            {
+                align: "center"
+            }
+        );
+
+
+        /* ====================================================
+           TOTAL
+        ==================================================== */
+
+        const totalAmount =
+            filteredExpenses.reduce(
+                function (
+                    sum,
+                    expense
+                ) {
+
+                    return (
+                        sum +
+                        Number(
+                            expense.amount ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.text(
+            `Total Entries: ${filteredExpenses.length}`,
+            15,
+            41
+        );
+
+
+        doc.text(
+            `Grand Total: ${formatCurrency(totalAmount)}`,
+            282,
+            41,
+            {
+                align: "right"
+            }
+        );
+
+
+        /* ====================================================
+           TABLE DATA
+        ==================================================== */
+
+        const tableRows =
+            filteredExpenses.map(
+                function (
+                    expense,
+                    index
+                ) {
+
+                    return [
+
+                        String(
+                            index + 1
+                        ),
+
+                        safePDFText(
+                            expense.creator
+                        ),
+
+                        formatDate(
+                            expense.expense_date
+                        ),
+
+                        formatTime(
+                            expense.expense_time
+                        ),
+
+                        safePDFText(
+                            expense.expense_type
+                        ),
+
+                        safePDFText(
+                            expense.category
+                        ),
+
+                        safePDFText(
+                            expense.comment
+                        ),
+
+                        formatPDFAmount(
+                            Number(
+                                expense.amount ||
+                                0
+                            )
+                        )
+
+                    ];
+
+                }
+            );
+
+
+        /* ====================================================
+           AUTO TABLE
+        ==================================================== */
+
+        doc.autoTable(
+            {
+                startY: 46,
+
+                head: [
+                    [
+                        "S.No.",
+                        "Creator",
+                        "Date",
+                        "Time",
+                        "Expense Type",
+                        "Category",
+                        "Description",
+                        "Amount"
+                    ]
+                ],
+
+                body:
+                    tableRows,
+
+                theme:
+                    "grid",
+
+                styles:
+                    {
+                        font:
+                            "helvetica",
+
+                        fontSize:
+                            7,
+
+                        cellPadding:
+                            2,
+
+                        overflow:
+                            "linebreak",
+
+                        valign:
+                            "middle"
+                    },
+
+                headStyles:
+                    {
+                        fontStyle:
+                            "bold",
+
+                        halign:
+                            "center"
+                    },
+
+                columnStyles:
+                    {
+                        0:
+                            {
+                                cellWidth:
+                                    12,
+                                halign:
+                                    "center"
+                            },
+
+                        1:
+                            {
+                                cellWidth:
+                                    25
+                            },
+
+                        2:
+                            {
+                                cellWidth:
+                                    22,
+                                halign:
+                                    "center"
+                            },
+
+                        3:
+                            {
+                                cellWidth:
+                                    18,
+                                halign:
+                                    "center"
+                            },
+
+                        4:
+                            {
+                                cellWidth:
+                                    30
+                            },
+
+                        5:
+                            {
+                                cellWidth:
+                                    25
+                            },
+
+                        6:
+                            {
+                                cellWidth:
+                                    "auto"
+                            },
+
+                        7:
+                            {
+                                cellWidth:
+                                    27,
+                                halign:
+                                    "right"
+                            }
+                    },
+
+                foot:
+                    [
+                        [
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "GRAND TOTAL",
+                            formatPDFAmount(
+                                totalAmount
+                            )
+                        ]
+                    ],
+
+                footStyles:
+                    {
+                        fontStyle:
+                            "bold"
+                    },
+
+                margin:
+                    {
+                        left:
+                            10,
+
+                        right:
+                            10
+                    },
+
+                didDrawPage:
+                    function (
+                        data
+                    ) {
+
+                        const pageCount =
+                            doc.getNumberOfPages();
+
+
+                        const pageNumber =
+                            doc.internal
+                                .getCurrentPageInfo()
+                                .pageNumber;
+
+
+                        doc.setFontSize(
+                            7
+                        );
+
+
+                        doc.setFont(
+                            "helvetica",
+                            "normal"
+                        );
+
+
+                        doc.text(
+                            `Page ${pageNumber} of ${pageCount}`,
+                            148,
+                            203,
+                            {
+                                align:
+                                    "center"
+                            }
+                        );
+
+
+                        doc.text(
+                            "Daily Expense Tracker",
+                            10,
+                            203
+                        );
+
+                    }
+
+            }
+        );
+
+
+        /* ====================================================
+           FILE NAME
+        ==================================================== */
+
+        const now =
+            new Date();
+
+
+        const datePart =
+            now
+                .toISOString()
+                .slice(
+                    0,
+                    10
+                );
+
+
+        const timePart =
+            [
+                String(
+                    now.getHours()
+                ).padStart(
+                    2,
+                    "0"
+                ),
+
+                String(
+                    now.getMinutes()
+                ).padStart(
+                    2,
+                    "0"
+                ),
+
+                String(
+                    now.getSeconds()
+                ).padStart(
+                    2,
+                    "0"
+                )
+            ].join(
+                "-"
+            );
+
+
+        const fileName =
+            `Daily_Expense_Report_${datePart}_${timePart}.pdf`;
+
+
+        /* ====================================================
+           SAVE
+        ==================================================== */
+
+        doc.save(
+            fileName
+        );
+
+
+        showSuccess(
+            "PDF generated successfully."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "PDF generation error:",
+            error
+        );
+
+
+        showError(
+            "Unable to create PDF. Please try again."
+        );
+
+    }
+
+    finally {
+
+        if (downloadButton) {
+
+            downloadButton.disabled =
+                false;
+
+            downloadButton.innerHTML =
+                originalHTML;
+
+        }
+
+    }
 }
 
 
 /* ============================================================
-   DATE FORMAT
+   PDF TEXT
 ============================================================ */
 
-function formatDate(dateString) {
-
-    if (!dateString) {
-
-        return "-";
-
-    }
-
-
-    const parts =
-        dateString.split("-");
-
-
-    if (parts.length !== 3) {
-
-        return dateString;
-
-    }
-
-
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-
-}
-
-
-/* ============================================================
-   ESCAPE HTML
-============================================================ */
-
-function escapeHtml(value) {
+function safePDFText(value) {
 
     if (
         value === null ||
@@ -3052,6 +3430,1409 @@ function escapeHtml(value) {
 
         return "";
 
+    }
+
+
+    return String(
+        value
+    )
+        .replace(
+            /\r?\n|\r/g,
+            " "
+        )
+        .trim();
+}
+
+
+/* ============================================================
+   PDF AMOUNT
+============================================================ */
+
+function formatPDFAmount(amount) {
+
+    return (
+        "Rs. " +
+        Number(
+            amount || 0
+        ).toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits:
+                    2,
+
+                maximumFractionDigits:
+                    2
+            }
+        )
+    );
+}
+
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+
+async function loadDashboard() {
+
+    if (
+        !supabaseClient
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("expenses")
+                .select("*")
+                .order(
+                    "expense_date",
+                    {
+                        ascending:
+                            true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const expenses =
+            data || [];
+
+
+        buildDashboard(
+            expenses
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+
+        showError(
+            error.message ||
+            "Unable to load dashboard."
+        );
+
+    }
+}
+
+
+/* ============================================================
+   BUILD DASHBOARD
+============================================================ */
+
+function buildDashboard(
+    expenses
+) {
+
+    const now =
+        new Date();
+
+
+    const currentYear =
+        now.getFullYear();
+
+
+    const currentMonth =
+        now.getMonth();
+
+
+    const previousDate =
+        new Date(
+            currentYear,
+            currentMonth - 1,
+            1
+        );
+
+
+    const previousYear =
+        previousDate.getFullYear();
+
+
+    const previousMonth =
+        previousDate.getMonth();
+
+
+    const currentData =
+        getMonthData(
+            expenses,
+            currentYear,
+            currentMonth
+        );
+
+
+    const previousData =
+        getMonthData(
+            expenses,
+            previousYear,
+            previousMonth
+        );
+
+
+    const currentName =
+        formatMonthName(
+            currentYear,
+            currentMonth
+        );
+
+
+    const previousName =
+        formatMonthName(
+            previousYear,
+            previousMonth
+        );
+
+
+    setText(
+        "currentMonthName",
+        currentName
+    );
+
+
+    setText(
+        "previousMonthName",
+        previousName
+    );
+
+
+    setText(
+        "currentMonthTotal",
+        formatCurrency(
+            currentData.total
+        )
+    );
+
+
+    setText(
+        "previousMonthTotal",
+        formatCurrency(
+            previousData.total
+        )
+    );
+
+
+    const difference =
+        currentData.total -
+        previousData.total;
+
+
+    setText(
+        "monthDifference",
+        formatCurrency(
+            difference
+        )
+    );
+
+
+    let percentage =
+        0;
+
+
+    if (
+        previousData.total !==
+        0
+    ) {
+
+        percentage =
+            (
+                difference /
+                previousData.total
+            ) *
+            100;
+
+    }
+
+
+    setText(
+        "differencePercentage",
+        `${percentage.toFixed(2)}%`
+    );
+
+
+    const monthlyAverage =
+        calculateMonthlyAverage(
+            expenses
+        );
+
+
+    setText(
+        "monthlyAverage",
+        formatCurrency(
+            monthlyAverage
+        )
+    );
+
+
+    setText(
+        "compareCurrentName",
+        currentName
+    );
+
+
+    setText(
+        "comparePreviousName",
+        previousName
+    );
+
+
+    setText(
+        "compareCurrentAmount",
+        formatCurrency(
+            currentData.total
+        )
+    );
+
+
+    setText(
+        "comparePreviousAmount",
+        formatCurrency(
+            previousData.total
+        )
+    );
+
+
+    buildComparisonResult(
+        currentData.total,
+        previousData.total
+    );
+
+
+    buildMonthlyChart(
+        expenses
+    );
+
+
+    buildCategoryComparison(
+        currentData.expenses
+    );
+
+
+    buildMonthlyTable(
+        expenses
+    );
+}
+
+
+/* ============================================================
+   MONTH DATA
+============================================================ */
+
+function getMonthData(
+    expenses,
+    year,
+    month
+) {
+
+    const monthExpenses =
+        expenses.filter(
+            function (expense) {
+
+                if (
+                    !expense.expense_date
+                ) {
+
+                    return false;
+                }
+
+
+                const date =
+                    new Date(
+                        expense.expense_date +
+                        "T00:00:00"
+                    );
+
+
+                return (
+                    date.getFullYear() ===
+                    year &&
+                    date.getMonth() ===
+                    month
+                );
+
+            }
+        );
+
+
+    const total =
+        monthExpenses.reduce(
+            function (
+                sum,
+                expense
+            ) {
+
+                return (
+                    sum +
+                    Number(
+                        expense.amount ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    return {
+        expenses:
+            monthExpenses,
+
+        total:
+            total,
+
+        entries:
+            monthExpenses.length
+    };
+}
+
+
+/* ============================================================
+   MONTH NAME
+============================================================ */
+
+function formatMonthName(
+    year,
+    month
+) {
+
+    const date =
+        new Date(
+            year,
+            month,
+            1
+        );
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            month:
+                "long",
+
+            year:
+                "numeric"
+        }
+    );
+}
+
+
+/* ============================================================
+   MONTHLY AVERAGE
+============================================================ */
+
+function calculateMonthlyAverage(
+    expenses
+) {
+
+    if (
+        expenses.length ===
+        0
+    ) {
+
+        return 0;
+    }
+
+
+    const monthlyTotals =
+        {};
+
+
+    expenses.forEach(
+        function (expense) {
+
+            if (
+                !expense.expense_date
+            ) {
+
+                return;
+            }
+
+
+            const date =
+                new Date(
+                    expense.expense_date +
+                    "T00:00:00"
+                );
+
+
+            const key =
+                `${date.getFullYear()}-${date.getMonth()}`;
+
+
+            if (
+                !monthlyTotals[key]
+            ) {
+
+                monthlyTotals[key] =
+                    0;
+
+            }
+
+
+            monthlyTotals[key] +=
+                Number(
+                    expense.amount ||
+                    0
+                );
+
+        }
+    );
+
+
+    const values =
+        Object.values(
+            monthlyTotals
+        );
+
+
+    if (
+        values.length ===
+        0
+    ) {
+
+        return 0;
+    }
+
+
+    const total =
+        values.reduce(
+            (
+                sum,
+                value
+            ) =>
+                sum + value,
+            0
+        );
+
+
+    return (
+        total /
+        values.length
+    );
+}
+
+
+/* ============================================================
+   COMPARISON RESULT
+============================================================ */
+
+function buildComparisonResult(
+    current,
+    previous
+) {
+
+    const element =
+        document.getElementById(
+            "comparisonResult"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    if (
+        current === 0 &&
+        previous === 0
+    ) {
+
+        element.textContent =
+            "No expense data available for comparison.";
+
+        return;
+    }
+
+
+    const difference =
+        current -
+        previous;
+
+
+    if (
+        difference > 0
+    ) {
+
+        element.innerHTML =
+            `<i class="fa-solid fa-arrow-trend-up me-2"></i>
+             Expense increased by
+             <strong>
+                ${formatCurrency(difference)}
+             </strong>
+             compared with the previous month.`;
+
+    }
+
+    else if (
+        difference < 0
+    ) {
+
+        element.innerHTML =
+            `<i class="fa-solid fa-arrow-trend-down me-2"></i>
+             Expense decreased by
+             <strong>
+                ${formatCurrency(
+                    Math.abs(difference)
+                )}
+             </strong>
+             compared with the previous month.`;
+
+    }
+
+    else {
+
+        element.innerHTML =
+            `<i class="fa-solid fa-equals me-2"></i>
+             Expense is the same as the previous month.`;
+
+    }
+}
+
+
+/* ============================================================
+   MONTHLY CHART
+============================================================ */
+
+function buildMonthlyChart(
+    expenses
+) {
+
+    const chart =
+        document.getElementById(
+            "monthlyChart"
+        );
+
+
+    if (!chart) {
+        return;
+    }
+
+
+    const monthlyMap =
+        {};
+
+
+    expenses.forEach(
+        function (expense) {
+
+            if (
+                !expense.expense_date
+            ) {
+
+                return;
+            }
+
+
+            const date =
+                new Date(
+                    expense.expense_date +
+                    "T00:00:00"
+                );
+
+
+            const key =
+                `${date.getFullYear()}-${date.getMonth()}`;
+
+
+            if (
+                !monthlyMap[key]
+            ) {
+
+                monthlyMap[key] = {
+
+                    year:
+                        date.getFullYear(),
+
+                    month:
+                        date.getMonth(),
+
+                    total:
+                        0
+
+                };
+
+            }
+
+
+            monthlyMap[key].total +=
+                Number(
+                    expense.amount ||
+                    0
+                );
+
+        }
+    );
+
+
+    let months =
+        Object.values(
+            monthlyMap
+        )
+        .sort(
+            function (a, b) {
+
+                if (
+                    a.year !==
+                    b.year
+                ) {
+
+                    return (
+                        a.year -
+                        b.year
+                    );
+
+                }
+
+
+                return (
+                    a.month -
+                    b.month
+                );
+
+            }
+        );
+
+
+    if (
+        months.length ===
+        0
+    ) {
+
+        chart.innerHTML =
+            `<div class="w-100 text-center text-muted">
+                No monthly expense data available.
+             </div>`;
+
+        return;
+    }
+
+
+    /*
+       Show last 12 months
+    */
+
+    months =
+        months.slice(
+            -12
+        );
+
+
+    const max =
+        Math.max(
+            ...months.map(
+                item =>
+                    item.total
+            )
+        );
+
+
+    chart.innerHTML =
+        months
+            .map(
+                function (item) {
+
+                    const height =
+                        max > 0
+                            ? (
+                                item.total /
+                                max
+                              ) *
+                              180
+                            : 5;
+
+
+                    return `
+                        <div class="chart-item">
+
+                            <div class="chart-value">
+                                ${formatCurrency(
+                                    item.total
+                                )}
+                            </div>
+
+                            <div class="chart-bar"
+                                 style="height:${Math.max(
+                                     height,
+                                     5
+                                 )}px;">
+                            </div>
+
+                            <div class="chart-month">
+                                ${new Date(
+                                    item.year,
+                                    item.month,
+                                    1
+                                ).toLocaleDateString(
+                                    "en-IN",
+                                    {
+                                        month:
+                                            "short",
+
+                                        year:
+                                            "2-digit"
+                                    }
+                                )}
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+}
+
+
+/* ============================================================
+   CATEGORY COMPARISON
+============================================================ */
+
+function buildCategoryComparison(
+    expenses
+) {
+
+    const container =
+        document.getElementById(
+            "categoryComparison"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const categoryTotals =
+        {};
+
+
+    expenses.forEach(
+        function (expense) {
+
+            const category =
+                expense.category ||
+                "Other";
+
+
+            if (
+                !categoryTotals[
+                    category
+                ]
+            ) {
+
+                categoryTotals[
+                    category
+                ] = 0;
+
+            }
+
+
+            categoryTotals[
+                category
+            ] +=
+                Number(
+                    expense.amount ||
+                    0
+                );
+
+        }
+    );
+
+
+    const categories =
+        Object.entries(
+            categoryTotals
+        )
+        .sort(
+            function (a, b) {
+
+                return (
+                    b[1] -
+                    a[1]
+                );
+
+            }
+        );
+
+
+    if (
+        categories.length ===
+        0
+    ) {
+
+        container.innerHTML =
+            `<p class="text-muted">
+                No category expenses for the current month.
+             </p>`;
+
+        return;
+    }
+
+
+    const max =
+        Math.max(
+            ...categories.map(
+                item =>
+                    item[1]
+            )
+        );
+
+
+    container.innerHTML =
+        categories
+            .map(
+                function (
+                    item
+                ) {
+
+                    const category =
+                        item[0];
+
+
+                    const amount =
+                        item[1];
+
+
+                    const width =
+                        max > 0
+                            ? (
+                                amount /
+                                max
+                              ) *
+                              100
+                            : 0;
+
+
+                    return `
+                        <div class="category-row">
+
+                            <div class="category-header">
+
+                                <span>
+                                    ${escapeHTML(
+                                        category
+                                    )}
+                                </span>
+
+                                <strong>
+                                    ${formatCurrency(
+                                        amount
+                                    )}
+                                </strong>
+
+                            </div>
+
+                            <div class="category-bar-wrapper">
+
+                                <div class="category-bar"
+                                     style="width:${width}%;">
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+}
+
+
+/* ============================================================
+   MONTHLY TABLE
+============================================================ */
+
+function buildMonthlyTable(
+    expenses
+) {
+
+    const tbody =
+        document.getElementById(
+            "monthlyTableBody"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const monthlyMap =
+        {};
+
+
+    expenses.forEach(
+        function (expense) {
+
+            if (
+                !expense.expense_date
+            ) {
+
+                return;
+            }
+
+
+            const date =
+                new Date(
+                    expense.expense_date +
+                    "T00:00:00"
+                );
+
+
+            const key =
+                `${date.getFullYear()}-${date.getMonth()}`;
+
+
+            if (
+                !monthlyMap[key]
+            ) {
+
+                monthlyMap[key] = {
+
+                    year:
+                        date.getFullYear(),
+
+                    month:
+                        date.getMonth(),
+
+                    total:
+                        0,
+
+                    entries:
+                        0
+
+                };
+
+            }
+
+
+            monthlyMap[key].total +=
+                Number(
+                    expense.amount ||
+                    0
+                );
+
+
+            monthlyMap[key].entries++;
+
+        }
+    );
+
+
+    const months =
+        Object.values(
+            monthlyMap
+        )
+        .sort(
+            function (a, b) {
+
+                if (
+                    a.year !==
+                    b.year
+                ) {
+
+                    return (
+                        b.year -
+                        a.year
+                    );
+
+                }
+
+
+                return (
+                    b.month -
+                    a.month
+                );
+
+            }
+        );
+
+
+    if (
+        months.length ===
+        0
+    ) {
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="5"
+                    class="text-center text-muted py-4">
+
+                    No monthly data available.
+
+                </td>
+             </tr>`;
+
+        return;
+    }
+
+
+    tbody.innerHTML =
+        months
+            .map(
+                function (
+                    item,
+                    index
+                ) {
+
+                    const previous =
+                        months[
+                            index + 1
+                        ];
+
+
+                    let difference =
+                        0;
+
+
+                    let change =
+                        0;
+
+
+                    if (
+                        previous
+                    ) {
+
+                        difference =
+                            item.total -
+                            previous.total;
+
+
+                        if (
+                            previous.total !==
+                            0
+                        ) {
+
+                            change =
+                                (
+                                    difference /
+                                    previous.total
+                                ) *
+                                100;
+
+                        }
+
+                    }
+
+
+                    const differenceText =
+                        formatCurrency(
+                            difference
+                        );
+
+
+                    const changeText =
+                        `${change.toFixed(2)}%`;
+
+
+                    return `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${formatMonthName(
+                                        item.year,
+                                        item.month
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${item.entries}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${formatCurrency(
+                                        item.total
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${differenceText}
+                            </td>
+
+                            <td>
+                                ${changeText}
+                            </td>
+
+                        </tr>
+                    `;
+
+                }
+            )
+            .join("");
+}
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+function goToExpenses() {
+
+    window.location.href =
+        "expense.html";
+}
+
+
+function goToDashboard() {
+
+    window.location.href =
+        "dashboard.html";
+}
+
+
+function goBack() {
+
+    if (
+        document.referrer &&
+        document.referrer !==
+            window.location.href
+    ) {
+
+        window.history.back();
+
+    }
+
+    else {
+
+        window.location.href =
+            "index.html";
+
+    }
+}
+
+
+/* ============================================================
+   DATE FORMAT
+============================================================ */
+
+function formatDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "-";
+    }
+
+
+    const parts =
+        String(
+            dateString
+        ).split("-");
+
+
+    if (
+        parts.length !==
+        3
+    ) {
+
+        return dateString;
+    }
+
+
+    return (
+        parts[2] +
+        "/" +
+        parts[1] +
+        "/" +
+        parts[0]
+    );
+}
+
+
+/* ============================================================
+   TIME FORMAT
+============================================================ */
+
+function formatTime(
+    timeString
+) {
+
+    if (!timeString) {
+        return "-";
+    }
+
+
+    const value =
+        String(
+            timeString
+        ).substring(
+            0,
+            5
+        );
+
+
+    if (
+        !value.includes(":")
+    ) {
+
+        return value;
+    }
+
+
+    const [
+        hourString,
+        minuteString
+    ] =
+        value.split(":");
+
+
+    let hour =
+        Number(
+            hourString
+        );
+
+
+    const minute =
+        minuteString;
+
+
+    const suffix =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+
+    hour =
+        hour % 12;
+
+
+    if (
+        hour === 0
+    ) {
+
+        hour = 12;
+
+    }
+
+
+    return (
+        `${hour}:${minute} ${suffix}`
+    );
+}
+
+
+/* ============================================================
+   TODAY STRING
+============================================================ */
+
+function getTodayString() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        `${year}-${month}-${day}`
+    );
+}
+
+
+/* ============================================================
+   CURRENCY
+============================================================ */
+
+function formatCurrency(
+    amount
+) {
+
+    return (
+        "₹" +
+        Number(
+            amount || 0
+        ).toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits:
+                    2,
+
+                maximumFractionDigits:
+                    2
+            }
+        )
+    );
+}
+
+
+/* ============================================================
+   SET TEXT
+============================================================ */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function escapeHTML(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
     }
 
 
@@ -3076,7 +4857,6 @@ function escapeHtml(value) {
             /'/g,
             "&#039;"
         );
-
 }
 
 
@@ -3084,7 +4864,23 @@ function escapeHtml(value) {
    SUCCESS TOAST
 ============================================================ */
 
-function showSuccess(message) {
+function showSuccess(
+    message
+) {
+
+    const messageElement =
+        document.getElementById(
+            "successToastMessage"
+        );
+
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
 
     const toastElement =
         document.getElementById(
@@ -3092,54 +4888,44 @@ function showSuccess(message) {
         );
 
 
-    if (!toastElement) {
+    if (
+        toastElement &&
+        typeof bootstrap !==
+            "undefined"
+    ) {
 
-        alert(message);
+        const toast =
+            bootstrap.Toast
+                .getOrCreateInstance(
+                    toastElement,
+                    {
+                        delay:
+                            3000
+                    }
+                );
 
-        return;
+
+        toast.show();
 
     }
 
+    else {
 
-    const body =
-        toastElement.querySelector(
-            ".toast-body"
+        console.log(
+            message
         );
-
-
-    if (body) {
-
-        body.textContent =
-            message;
 
     }
-
-
-    const toast =
-        bootstrap.Toast.getOrCreateInstance(
-            toastElement,
-            {
-                delay: 3000
-            }
-        );
-
-
-    toast.show();
-
 }
 
 
 /* ============================================================
-   ERROR MESSAGE
+   ERROR TOAST
 ============================================================ */
 
-function showError(message) {
-
-    const toastElement =
-        document.getElementById(
-            "errorToast"
-        );
-
+function showError(
+    message
+) {
 
     const messageElement =
         document.getElementById(
@@ -3147,141 +4933,46 @@ function showError(message) {
         );
 
 
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+
+    const toastElement =
+        document.getElementById(
+            "errorToast"
+        );
+
+
     if (
-        !toastElement ||
-        !messageElement
+        toastElement &&
+        typeof bootstrap !==
+            "undefined"
     ) {
 
-        alert(message);
-
-        return;
-
-    }
-
-
-    messageElement.textContent =
-        message;
-
-
-    const toast =
-        bootstrap.Toast.getOrCreateInstance(
-            toastElement,
-            {
-                delay: 5000
-            }
-        );
+        const toast =
+            bootstrap.Toast
+                .getOrCreateInstance(
+                    toastElement,
+                    {
+                        delay:
+                            5000
+                    }
+                );
 
 
-    toast.show();
-
-}
-
-
-/* ============================================================
-   NAVIGATION
-============================================================ */
-
-function goToExpenses() {
-
-    window.location.href =
-        "expense.html";
-
-}
-
-
-/* ============================================================
-   DASHBOARD
-============================================================ */
-
-function goToDashboard() {
-
-    window.location.href =
-        "dashboard.html";
-
-}
-
-
-/* ============================================================
-   BACK
-============================================================ */
-
-function goBack() {
-
-    window.history.back();
-
-}
-
-
-/* ============================================================
-   COMMON NAVIGATION
-============================================================ */
-
-function initializeCommonNavigation() {
-
-    /* Reserved for future common navigation features */
-
-}
-
-
-/* ============================================================
-   DASHBOARD
-   BASIC COMPATIBILITY FUNCTION
-
-   If your existing dashboard code already has a more advanced
-   dashboard implementation, you can retain that section.
-============================================================ */
-
-async function loadDashboard() {
-
-    try {
-
-        const {
-            data,
-            error
-        } = await supabaseClient
-
-            .from("expenses")
-
-            .select("*")
-
-            .order("expense_date", {
-                ascending: true
-            });
-
-
-        if (error) {
-
-            console.error(
-                "Dashboard loading error:",
-                error
-            );
-
-            return;
-
-        }
-
-
-        console.log(
-            "Dashboard data:",
-            data
-        );
-
-
-        /* ----------------------------------------------------
-           Your existing dashboard calculations can use
-           this data.
-        ---------------------------------------------------- */
+        toast.show();
 
     }
-    catch (error) {
+
+    else {
 
         console.error(
-            "Dashboard error:",
-            error
+            message
         );
 
     }
-
 }
-
-
